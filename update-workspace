@@ -1,0 +1,105 @@
+#!/usr/bin/env python3
+
+import io
+import os.path
+import xml.etree.ElementTree as ET
+
+
+ADVENT = os.path.basename(os.path.abspath(os.curdir))
+
+
+t = ET.parse('.idea/workspace.xml')
+
+n = t.find('.//component[@name="RunManager"][@selected="Haskell Stack.specs"]')
+while len(n) > 0:
+    n.remove(n[0])
+
+repl = ET.fromstring("""
+    <configuration factoryName="Haskell Stack REPL" name="REPL" show_console_on_std_err="false" show_console_on_std_out="false" type="HaskellStackConfigurationType">
+      <module name="advent2020" />
+      <option name="allowRunningInParallel" value="false" />
+      <option name="stackArgs" value="" />
+      <option name="stackTarget" value="advent2020:lib" />
+      <option name="workingDirPath" value="$PROJECT_DIR$" />
+      <method v="2">
+        <option enabled="true" name="Make" />
+      </method>
+    </configuration>
+""")
+
+n.append(repl)
+
+for i in range(1, 26):
+
+    dayN = ET.fromstring(f"""
+    <configuration factoryName="Haskell Stack Runner" name="day{i}" show_console_on_std_err="false" show_console_on_std_out="false" type="HaskellStackConfigurationType">
+      <module name="{ADVENT}" />
+      <option name="allowRunningInParallel" value="false" />
+      <option name="executable" value="{ADVENT}-exe" />
+      <option name="programArgs" value="day{i} data/day{i}/input" />
+      <option name="stackArgs" value="" />
+      <option name="workingDirPath" value="$PROJECT_DIR$" />
+      <method v="2">
+        <option enabled="true" name="Make" />
+      </method>
+    </configuration>
+""")
+
+    n.append(dayN)
+
+    dayNb = ET.fromstring(f"""
+    <configuration factoryName="Haskell Stack Runner" name="day{i}b" show_console_on_std_err="false" show_console_on_std_out="false" type="HaskellStackConfigurationType">
+      <module name="{ADVENT}" />
+      <option name="allowRunningInParallel" value="false" />
+      <option name="executable" value="{ADVENT}-exe" />
+      <option name="programArgs" value="day{i}b data/day{i}/input" />
+      <option name="stackArgs" value="" />
+      <option name="workingDirPath" value="$PROJECT_DIR$" />
+      <method v="2">
+        <option enabled="true" name="Make" />
+      </method>
+    </configuration>
+""")
+
+    n.append(dayNb)
+
+specs = ET.fromstring("""
+    <configuration factoryName="Haskell Stack Tester" name="specs" show_console_on_std_err="false" show_console_on_std_out="false" type="HaskellStackConfigurationType">
+      <module name="advent2015" />
+      <option name="allowRunningInParallel" value="false" />
+      <option name="stackArgs" value="" />
+      <option name="testArguments" value="--color" />
+      <option name="testSuiteTargetName" value="advent2015:test:advent2015-test" />
+      <option name="workingDirPath" value="$PROJECT_DIR$" />
+      <method v="2">
+        <option enabled="true" name="Make" />
+      </method>
+    </configuration>
+""")
+
+n.append(specs)
+
+l = ET.Element("list")
+
+it = ET.Element("item")
+it.set("itemvalue", "Haskell Stack.REPL")
+l.append(it)
+
+for i in range(1, 26):
+    it = ET.Element("item")
+    it.set("itemvalue", f"Haskell Stack.day{i}")
+    l.append(it)
+
+    it = ET.Element("item")
+    it.set("itemvalue", f"Haskell Stack.day{i}b")
+    l.append(it)
+
+
+it = ET.Element("item")
+it.set("itemvalue", "Haskell Stack.specs")
+l.append(it)
+
+n.append(l)
+
+
+t.write(".idea/workspace.wml", encoding="utf-8", xml_declaration=True)
