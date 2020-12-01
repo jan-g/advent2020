@@ -105,6 +105,7 @@ test-suite advent2020-test
     , bytestring
     , containers
     , cryptohash-md5
+    , hspec >=2.5.5
     , sort
     , split
     , strings >=1.1
