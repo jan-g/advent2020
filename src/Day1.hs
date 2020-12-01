@@ -6,6 +6,7 @@ import Data.Array
 import qualified Data.Set as Set
 import qualified Data.Map.Strict as Map
 import Data.Char
+import Data.Maybe (catMaybes, fromJust, isJust)
 
 {-
 --- Day 1: Report Repair ---
@@ -43,15 +44,15 @@ parse ls = ls
          & map read
 
 day1 ls =
-  result 2020 (parse ls)
+  result 2020 (parse ls & Set.fromList)
 
 findPairs target ns =
-  let values = Set.fromList ns
-  in  Set.filter (\v -> Set.member (target - v) values) values
+  Set.filter (\v -> Set.member (target - v) ns) ns
 
 result target ns =
-  let [a, b] = findPairs target ns & Set.toList
-  in  a * b
+  case findPairs target ns & Set.toList of
+    [a, b] -> Just (a * b)
+    [] -> Nothing
 
 testData = "1721\n\
            \979\n\
@@ -61,6 +62,22 @@ testData = "1721\n\
            \1456"
 
 {-
+--- Part Two ---
+
+The Elves in accounting are thankful for your help; one of them even offers you a starfish coin they had left over from a past vacation. They offer you a second one if you can find three numbers in your expense report that meet the same criteria.
+
+Using the above example again, the three entries that sum to 2020 are 979, 366, and 675. Multiplying them together produces the answer, 241861950.
+
+In your expense report, what is the product of the three entries that sum to 2020?
+
 -}
 
-day1b ls = "hello world"
+day1b ls =
+  parse ls & Set.fromList & findTriples 2020 & Set.toList & product
+
+findTriples :: Integer -> Set.Set Integer -> Set.Set Integer
+findTriples target ns =
+  Set.filter (\c ->
+                let remainder = Set.delete c ns
+                in  result (target - c) remainder & isJust) ns
+
