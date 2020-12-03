@@ -9,6 +9,7 @@ import Control.Monad
 import Data.List.Split (splitOn)
 
 import qualified Day1
+import qualified Day3
 
 
 main :: IO ()
@@ -23,3 +24,19 @@ main =
       it "correctly runs on the test data" $ do
         let ns = lines Day1.testData & Day1.parse & Set.fromList
         Day1.findTriples 2020 ns `shouldBe` Set.fromList [979, 366, 675]
+
+    describe "Day3" $ do
+      it "correctly runs the test data" $ do
+        let ls = "..##.......\n\
+                 \#...#...#..\n\
+                 \.#....#..#.\n\
+                 \..#.#...#.#\n\
+                 \.#...##..#.\n\
+                 \..#.##.....\n\
+                 \.#.#.#....#\n\
+                 \.#........#\n\
+                 \#.##...#...\n\
+                 \#...##....#\n\
+                 \.#..#...#.#"
+        (Day3.day3 (lines ls)) `shouldBe` 7
+        (Day3.day3b (lines ls)) `shouldBe` 336
