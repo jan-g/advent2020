@@ -3,6 +3,7 @@ module Lib
     , makeArray
     , natParser
     , intParser
+    , quickParse
     , drawMapWith
     , mapReverse
     , (<<<<)
@@ -39,6 +40,13 @@ intParser = do
     char '-'
     i <- natParser
     return $ -i) <++ natParser
+
+quickParse :: ReadP t -> String -> Maybe t
+quickParse parser s =
+  case readP_to_S parser s of
+    [] -> Nothing
+    [(m, "")] -> Just m
+    _ -> Nothing
 
 drawMapWith :: (Ord a, Enum a) => ((a, a) -> Maybe b -> c) -> Map.Map (a, a) b -> [[c]]
 drawMapWith f m =
