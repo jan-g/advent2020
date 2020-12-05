@@ -11,6 +11,7 @@ import Data.List.Split (splitOn)
 import qualified Day1
 import qualified Day3
 import qualified Day4
+import qualified Day5
 
 
 main :: IO ()
@@ -113,3 +114,9 @@ main =
         let validity = map Day4.isMoreValid parse
 
         validity `shouldBe` [True, True, True, True]
+
+    describe "Day4" $ do
+      it "correctly decodes passes" $ do
+        (Day5.pass 0 "BFFFBBFRRR") `shouldBe` 567
+        (Day5.pass 0 "FFFBBBFRRR") `shouldBe` 119
+        (Day5.pass 0 "BBFFBBFRLL") `shouldBe` 820
