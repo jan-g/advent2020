@@ -12,6 +12,7 @@ import qualified Day1
 import qualified Day3
 import qualified Day4
 import qualified Day5
+import qualified Day6
 
 
 main :: IO ()
@@ -115,8 +116,27 @@ main =
 
         validity `shouldBe` [True, True, True, True]
 
-    describe "Day4" $ do
+    describe "Day5" $ do
       it "correctly decodes passes" $ do
         (Day5.pass 0 "BFFFBBFRRR") `shouldBe` 567
         (Day5.pass 0 "FFFBBBFRRR") `shouldBe` 119
         (Day5.pass 0 "BBFFBBFRLL") `shouldBe` 820
+
+    describe "Day6" $ do
+      it "does part a for the example" $ do
+        let example = "abc\n\
+                      \\n\
+                      \a\n\
+                      \b\n\
+                      \c\n\
+                      \\n\
+                      \ab\n\
+                      \ac\n\
+                      \\n\
+                      \a\n\
+                      \a\n\
+                      \a\n\
+                      \a\n\
+                      \\n\
+                      \b" & lines
+        (Day6.day6 example) `shouldBe` 11
