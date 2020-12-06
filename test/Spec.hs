@@ -123,20 +123,23 @@ main =
         (Day5.pass 0 "BBFFBBFRLL") `shouldBe` 820
 
     describe "Day6" $ do
+      let example = "abc\n\
+                    \\n\
+                    \a\n\
+                    \b\n\
+                    \c\n\
+                    \\n\
+                    \ab\n\
+                    \ac\n\
+                    \\n\
+                    \a\n\
+                    \a\n\
+                    \a\n\
+                    \a\n\
+                    \\n\
+                    \b" & lines
+
       it "does part a for the example" $ do
-        let example = "abc\n\
-                      \\n\
-                      \a\n\
-                      \b\n\
-                      \c\n\
-                      \\n\
-                      \ab\n\
-                      \ac\n\
-                      \\n\
-                      \a\n\
-                      \a\n\
-                      \a\n\
-                      \a\n\
-                      \\n\
-                      \b" & lines
-        (Day6.day6 example) `shouldBe` 11
+                (Day6.day6 example) `shouldBe` 11
+      it "does part b for the example" $ do
+                (Day6.day6b example) `shouldBe` 6
