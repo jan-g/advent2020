@@ -175,11 +175,11 @@ main =
                                   ,(Day7.Bag "faded blue", Set.fromList [])
                                   ,(Day7.Bag "dotted black", Set.fromList [])
                                   ]
-      
+
       it "inverts a simple map" $ do
         let p = Day7.parse ["a b bags contain 1 c d bag."]
         (Day7.invert p) `shouldBe` Map.fromList [(Day7.Bag "c d", Set.fromList [Day7.Bag "a b"])]
-      
+
       it "inverts a complex map" $ do
         let p = Day7.parse ["a b bags contain 1 c d bag, 3 e f bags."
                            ,"g h bags contain 3 c d bags, 1 i j bag."]
@@ -194,8 +194,33 @@ main =
         (Day7.canContain p (Day7.Bag "a b")) `shouldBe` Set.fromList []
         (Day7.canContain p (Day7.Bag "i j")) `shouldBe` Set.fromList [Day7.Bag "g h"]
         (Day7.canContain p (Day7.Bag "c d")) `shouldBe` Set.fromList [Day7.Bag "a b", Day7.Bag "g h"]
-      
+
       it "passes part a for the example" $ do
         let p = Day7.parse example
         (Day7.canContain p Day7.myBag) `shouldBe` Set.fromList [Day7.Bag "bright white",Day7.Bag "muted yellow",Day7.Bag "dark orange",Day7.Bag "light red"]
         (Day7.day7 example) `shouldBe` 4
+
+      it "passes part b for the first example" $ do
+        let p = Day7.parse example
+        (Day7.totalForward p Day7.myBag) `shouldBe` 33
+        (Day7.day7b example) `shouldBe` 32
+
+      it "passes part b for the other example" $ do
+        let ex2 = "shiny gold bags contain 2 dark red bags.\n\
+                  \dark red bags contain 2 dark orange bags.\n\
+                  \dark orange bags contain 2 dark yellow bags.\n\
+                  \dark yellow bags contain 2 dark green bags.\n\
+                  \dark green bags contain 2 dark blue bags.\n\
+                  \dark blue bags contain 2 dark violet bags.\n\
+                  \dark violet bags contain no other bags." & lines
+            p = Day7.parse ex2
+        p `shouldBe` Map.fromList [(Day7.Bag "shiny gold", Set.fromList [(2, Day7.Bag "dark red")])
+                                  ,(Day7.Bag "dark red", Set.fromList [(2, Day7.Bag "dark orange")])
+                                  ,(Day7.Bag "dark orange", Set.fromList [(2, Day7.Bag "dark yellow")])
+                                  ,(Day7.Bag "dark yellow", Set.fromList [(2, Day7.Bag "dark green")])
+                                  ,(Day7.Bag "dark green", Set.fromList [(2, Day7.Bag "dark blue")])
+                                  ,(Day7.Bag "dark blue", Set.fromList [(2, Day7.Bag "dark violet")])
+                                  ,(Day7.Bag "dark violet", Set.fromList [])
+                                  ]
+        (Day7.totalForward p Day7.myBag) `shouldBe` 127
+        (Day7.day7b ex2) `shouldBe` 126
