@@ -8,11 +8,13 @@ import qualified Data.Set as Set
 import Control.Monad
 import Data.List.Split (splitOn)
 
+import Lib
 import qualified Day1
 import qualified Day3
 import qualified Day4
 import qualified Day5
 import qualified Day6
+import qualified Day7
 
 
 main :: IO ()
@@ -143,3 +145,57 @@ main =
                 (Day6.day6 example) `shouldBe` 11
       it "does part b for the example" $ do
                 (Day6.day6b example) `shouldBe` 6
+
+    describe "day 7" $ do
+      let example = "light red bags contain 1 bright white bag, 2 muted yellow bags.\n\
+                    \dark orange bags contain 3 bright white bags, 4 muted yellow bags.\n\
+                    \bright white bags contain 1 shiny gold bag.\n\
+                    \muted yellow bags contain 2 shiny gold bags, 9 faded blue bags.\n\
+                    \shiny gold bags contain 1 dark olive bag, 2 vibrant plum bags.\n\
+                    \dark olive bags contain 3 faded blue bags, 4 dotted black bags.\n\
+                    \vibrant plum bags contain 5 faded blue bags, 6 dotted black bags.\n\
+                    \faded blue bags contain no other bags.\n\
+                    \dotted black bags contain no other bags." & lines
+      it "parses one item" $ do
+        (quickParse Day7.contentParser' "1 old grey bag") `shouldBe` Just (1, Day7.Bag "old grey")
+      it "parses a list of content" $ do
+        (quickParse Day7.contentParser "1 old grey bag.") `shouldBe` Just (Set.singleton (1, Day7.Bag "old grey"))
+        (quickParse Day7.contentParser "3 old grey bags.") `shouldBe` Just (Set.singleton (3, Day7.Bag "old grey"))
+        (quickParse Day7.contentParser "3 old grey bags, 1 bright red bag.") `shouldBe` Just (Set.fromList [(3, Day7.Bag "old grey"), (1, Day7.Bag "bright red")])
+
+      it "parses the whole thing" $ do
+        let p = Day7.parse example
+        p `shouldBe` Map.fromList [(Day7.Bag "light red", Set.fromList [(1, Day7.Bag "bright white"), (2, Day7.Bag "muted yellow")])
+                                  ,(Day7.Bag "dark orange", Set.fromList [(3, Day7.Bag "bright white"), (4, Day7.Bag "muted yellow")])
+                                  ,(Day7.Bag "bright white", Set.fromList [(1, Day7.Bag "shiny gold")])
+                                  ,(Day7.Bag "muted yellow", Set.fromList [(2, Day7.Bag "shiny gold"), (9, Day7.Bag "faded blue")])
+                                  ,(Day7.Bag "shiny gold", Set.fromList [(1, Day7.Bag "dark olive"), (2, Day7.Bag "vibrant plum")])
+                                  ,(Day7.Bag "dark olive", Set.fromList [(3, Day7.Bag "faded blue"), (4, Day7.Bag "dotted black")])
+                                  ,(Day7.Bag "vibrant plum", Set.fromList [(5, Day7.Bag "faded blue"), (6, Day7.Bag "dotted black")])
+                                  ,(Day7.Bag "faded blue", Set.fromList [])
+                                  ,(Day7.Bag "dotted black", Set.fromList [])
+                                  ]
+      
+      it "inverts a simple map" $ do
+        let p = Day7.parse ["a b bags contain 1 c d bag."]
+        (Day7.invert p) `shouldBe` Map.fromList [(Day7.Bag "c d", Set.fromList [Day7.Bag "a b"])]
+      
+      it "inverts a complex map" $ do
+        let p = Day7.parse ["a b bags contain 1 c d bag, 3 e f bags."
+                           ,"g h bags contain 3 c d bags, 1 i j bag."]
+        (Day7.invert p) `shouldBe` Map.fromList [(Day7.Bag "c d", Set.fromList [Day7.Bag "a b", Day7.Bag "g h"])
+                                                ,(Day7.Bag "e f", Set.fromList [Day7.Bag "a b"])
+                                                ,(Day7.Bag "i j", Set.fromList [Day7.Bag "g h"])]
+
+      it "expands containment" $ do
+        let p = Day7.parse ["a b bags contain 1 c d bag, 3 e f bags."
+                           ,"g h bags contain 3 c d bags, 1 i j bag."]
+        (Day7.canContain p (Day7.Bag "e f")) `shouldBe` Set.fromList [Day7.Bag "a b"]
+        (Day7.canContain p (Day7.Bag "a b")) `shouldBe` Set.fromList []
+        (Day7.canContain p (Day7.Bag "i j")) `shouldBe` Set.fromList [Day7.Bag "g h"]
+        (Day7.canContain p (Day7.Bag "c d")) `shouldBe` Set.fromList [Day7.Bag "a b", Day7.Bag "g h"]
+      
+      it "passes part a for the example" $ do
+        let p = Day7.parse example
+        (Day7.canContain p Day7.myBag) `shouldBe` Set.fromList [Day7.Bag "bright white",Day7.Bag "muted yellow",Day7.Bag "dark orange",Day7.Bag "light red"]
+        (Day7.day7 example) `shouldBe` 4

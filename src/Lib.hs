@@ -6,6 +6,7 @@ module Lib
     , quickParse
     , drawMapWith
     , mapReverse
+    , mapReverseAll
     , (<<<<)
     , (>>>>)
     , (<<>>)
@@ -60,6 +61,14 @@ drawMapWith f m =
 mapReverse :: (Ord v, Ord k) => Map.Map k v -> Map.Map v (Set.Set k)
 mapReverse m = foldl (\m (k,v) -> Map.insertWith Set.union v (Set.singleton k) m) Map.empty (Map.toList m)
 
+mapReverseAll :: (Ord v, Ord k) => Map.Map k (Set.Set v) -> Map.Map v (Set.Set k)
+mapReverseAll m =
+  let kvs = Map.map Set.toList m        -- Map.Map k [v]
+      kvs' = Map.toList kvs             -- [(k, [v])]
+      vks = [[(vv, Set.singleton kk)] | (kk, vvs) <- kvs', vv <- vvs]  -- [[(v, Set.Set k)]]
+      vks' = concat vks                 -- [(v, Set.Set k)]
+  in Map.fromListWith Set.union vks'
+      
 
 infixl 8 <<<<
 (<<<<) :: ReadP p1 -> ReadP p2 -> ReadP p1
