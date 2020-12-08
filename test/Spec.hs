@@ -253,4 +253,11 @@ main =
                     \jmp -4\n\
                     \acc +6" & lines
       it "evaluates the example" $ do
-        (Day8.day8 example) `shouldBe` 5
+        (Day8.day8 example) `shouldBe` (Day8.Repeated 5)
+      
+      it "determines all alternatives" $ do
+        let instr = Day8.parse example
+            variants = Day8.decorrupt instr
+        (length variants) `shouldBe` 4
+      it "evaluates alternatives loking for terminations" $ do
+        (Day8.day8b example) `shouldBe` [Day8.Terminated 8]
