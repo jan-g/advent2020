@@ -15,6 +15,23 @@ import qualified Day4
 import qualified Day5
 import qualified Day6
 import qualified Day7
+import qualified Day8
+import qualified Day9
+import qualified Day10
+import qualified Day11
+import qualified Day12
+import qualified Day13
+import qualified Day14
+import qualified Day15
+import qualified Day16
+import qualified Day17
+import qualified Day18
+import qualified Day19
+import qualified Day20
+import qualified Day21
+import qualified Day22
+import qualified Day23
+import qualified Day24
 
 
 main :: IO ()
@@ -224,3 +241,16 @@ main =
                                   ]
         (Day7.totalForward p Day7.myBag) `shouldBe` 127
         (Day7.day7b ex2) `shouldBe` 126
+    
+    describe "day 8" $ do
+      let example = "nop +0\n\
+                    \acc +1\n\
+                    \jmp +4\n\
+                    \acc +3\n\
+                    \jmp -3\n\
+                    \acc -99\n\
+                    \acc +1\n\
+                    \jmp -4\n\
+                    \acc +6" & lines
+      it "evaluates the example" $ do
+        (Day8.day8 example) `shouldBe` 5
