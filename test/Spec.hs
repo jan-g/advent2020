@@ -295,3 +295,6 @@ main =
       it "works out the sequence" $ do
         (Day9.locateSequence 127 example) `shouldBe` [15,25,47,40]
         (Day9.answer 127 example) `shouldBe` 15 + 47
+      
+      it "works using the linear search" $ do
+        (Day9.locateSequence2 127 example) `shouldBe` [15, 25, 47, 40]
