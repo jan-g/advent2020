@@ -241,7 +241,7 @@ main =
                                   ]
         (Day7.totalForward p Day7.myBag) `shouldBe` 127
         (Day7.day7b ex2) `shouldBe` 126
-    
+
     describe "day 8" $ do
       let example = "nop +0\n\
                     \acc +1\n\
@@ -254,10 +254,44 @@ main =
                     \acc +6" & lines
       it "evaluates the example" $ do
         (Day8.day8 example) `shouldBe` (Day8.Repeated 5)
-      
+
       it "determines all alternatives" $ do
         let instr = Day8.parse example
             variants = Day8.decorrupt instr
         (length variants) `shouldBe` 4
       it "evaluates alternatives loking for terminations" $ do
         (Day8.day8b example) `shouldBe` [Day8.Terminated 8]
+
+
+    describe "day 9" $ do
+      it "computes isSumOf correctly" $ do
+        (Day9.isSumOf [1, 2, 3, 4, 5] 3) `shouldBe` True
+        (Day9.isSumOf [2] 4) `shouldBe` False
+        -- apparently not: (Day9.isSumOf [2, 2] 4) `shouldBe` True
+
+      let example = [35
+                    ,20
+                    ,15
+                    ,25
+                    ,47
+                    ,40
+                    ,62
+                    ,55
+                    ,65
+                    ,95
+                    ,102
+                    ,117
+                    ,150
+                    ,182
+                    ,127
+                    ,219
+                    ,299
+                    ,277
+                    ,309
+                    ,576]
+      it "locates the first non-sum" $ do
+        (Day9.dropSums 5 example) `shouldBe` 127
+        
+      it "works out the sequence" $ do
+        (Day9.locateSequence 127 example) `shouldBe` [15,25,47,40]
+        (Day9.answer 127 example) `shouldBe` 15 + 47
