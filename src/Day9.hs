@@ -135,8 +135,9 @@ locateSequence2 target ns =
     search acc soFar (i:rest)
       | i + acc == target  &&  soFar /= []  = soFar ++ [i]
       | i + acc <= target  =  search (acc + i) (soFar ++ [i]) rest
-      | otherwise = let (h:r) = soFar
-                    in  search (acc - h) r (i:rest) 
+      | soFar /= [] = let (h:r) = soFar
+                      in  search (acc - h) r (i:rest)
+      | otherwise = search 0 [] rest
 
 answer target ns =
   let ss = locateSequence2 target ns
