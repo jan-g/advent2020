@@ -291,14 +291,17 @@ main =
                     ,576]
       it "locates the first non-sum" $ do
         (Day9.dropSums 5 example) `shouldBe` 127
-        
+
       it "works out the sequence" $ do
         (Day9.locateSequence 127 example) `shouldBe` [15,25,47,40]
       it "finds the greatest and least values of the sequence" $ do
         (Day9.answer 127 example) `shouldBe` 15 + 47
-      
+
       it "works using the linear search" $ do
-        (Day9.locateSequence2 127 example) `shouldBe` [15, 25, 47, 40]
-      
+        (Day9.locateSequence2 127 example) `shouldBe` Just [15, 25, 47, 40]
+
       it "satisfies some problematical sequence searches" $ do
-        (Day9.locateSequence2 5 [6, 7, 6, 5, 1, 2, 2]) `shouldBe` [1, 2, 2]
+        (Day9.locateSequence2 5 [6, 7, 6, 5, 1, 2, 2]) `shouldBe` Just [1, 2, 2]
+
+      it "fails gracefully" $ do
+        (Day9.locateSequence2 5 [1, 1, 1]) `shouldBe` Nothing

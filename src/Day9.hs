@@ -132,15 +132,16 @@ locateSequence target ns =
 locateSequence2 target ns =
   search 0 [] ns
   where
+    search _ _ [] = Nothing
     search acc soFar (i:rest)
-      | i + acc == target  &&  soFar /= []  = soFar ++ [i]
+      | i + acc == target  &&  soFar /= []  = Just $ soFar ++ [i]
       | i + acc <= target  =  search (acc + i) (soFar ++ [i]) rest
       | soFar /= [] = let (h:r) = soFar
                       in  search (acc - h) r (i:rest)
       | otherwise = search 0 [] rest
 
 answer target ns =
-  let ss = locateSequence2 target ns
+  let Just ss = locateSequence2 target ns
       m = minimum ss
       n = maximum ss
   in m + n
