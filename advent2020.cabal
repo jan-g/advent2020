@@ -62,6 +62,7 @@ library
     , bytestring
     , containers
     , cryptohash-md5
+    , matrix
     , sort
     , split
     , strings >=1.1
@@ -83,6 +84,7 @@ executable advent2020-exe
     , bytestring
     , containers
     , cryptohash-md5
+    , matrix
     , sort
     , split
     , strings >=1.1
@@ -106,6 +108,7 @@ test-suite advent2020-test
     , containers
     , cryptohash-md5
     , hspec >=2.5.5
+    , matrix
     , sort
     , split
     , strings >=1.1

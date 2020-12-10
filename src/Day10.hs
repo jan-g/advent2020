@@ -10,6 +10,9 @@ import Data.Char
 import Data.Maybe (catMaybes, isJust, fromJust)
 import Text.ParserCombinators.ReadP as P
 
+import Data.Complex
+import qualified Data.Matrix as M
+
 import Lib
 
 {-
@@ -179,18 +182,90 @@ partB ns =
       as = L.sort (0:upper:ns)
       diffs = zipWith (-) (tail as) as
       oneSeqs = splitOn [3] diffs
-      ways = map count oneSeqs
+      ways = map cnt oneSeqs
   in product ways
-  where
-   count [] = 1
-   count (3:rest) = count rest              -- one way to skip past a three
-   count (1:1:1:rest) = count (1:1:rest)    -- do 1:1:1:rest
-                      + count (1:rest)      -- 2:1:rest
-                      + count rest          -- 3:rest
-   count (1:1:rest)   = count (1:rest)      -- 1:1:rest
-                      + count rest          -- 2:rest
-   count (1:rest)     = count rest          -- 1:rest
+
+cnt [] = 1
+cnt (1:1:1:rest) = cnt (1:1:rest)    -- do 1:1:1:rest
+                 + cnt (1:rest)      -- 2:1:rest
+                 + cnt rest          -- 3:rest
+cnt (1:1:rest)   = cnt (1:rest)      -- 1:1:rest
+                 + cnt rest          -- 2:rest
+cnt (1:rest)     = cnt rest          -- 1:rest
+
+
+cnt' 0 = 1
+cnt' 1 = cnt' 0
+cnt' 2 = cnt' 1 + cnt' 0
+cnt' n = cnt' (n-1) + cnt' (n-2) + cnt' (n-3)
+
 
 day10b ls =
   let as = parse ls
   in partB as
+
+
+
+{-
+Matrix-wise:
+  let the counts for n-3, n-2, n-1 be in a 3x1 matrix
+  Then
+
+  (n-2|   = ( 0 1 0 |  ( n-3 |
+  |n-1|     | 0 0 1 |  | n-2 |
+  |n  )     | 1 1 1 )  | n-1 )
+
+Base case: (n=0, n=1, n=2) = (1 1 2)
+So for n >= 3 we want
+
+  (n-2|  = ( 0 1 0 | ^ (n-2)  ( 1 |
+  |n-1|    | 0 0 1 |          | 1 |
+  | n )    | 1 1 1 )          | 2 )
+
+We have
+
+λ_1 = 1/3 (1 + (19 - 3 sqrt(33))^(1/3) + (19 + 3 sqrt(33))^(1/3))
+λ_2 = 1/3 - 1/6 (1 + i sqrt(3)) (19 - 3 sqrt(33))^(1/3) - 1/6 (1 - i sqrt(3)) (19 + 3 sqrt(33))^(1/3)
+λ_3 = 1/3 - 1/6 (1 - i sqrt(3)) (19 - 3 sqrt(33))^(1/3) - 1/6 (1 + i sqrt(3)) (19 + 3 sqrt(33))^(1/3)
+
+and eigenvectors
+v_1 = (1/3 (-1 - (4 2^(2/3))/(13 + 3 sqrt(33))^(1/3) + (2 (13 + 3 sqrt(33)))^(1/3)), 1/3 (-1 - 2/(17 + 3 sqrt(33))^(1/3) + (17 + 3 sqrt(33))^(1/3)), 1)
+v_2 = (-1/3 + (2 2^(2/3) (1 + i sqrt(3)))/(3 (13 + 3 sqrt(33))^(1/3)) - ((1 - i sqrt(3)) (13 + 3 sqrt(33))^(1/3))/(3 2^(2/3)), -1/3 + (1 - i sqrt(3))/(3 (17 + 3 sqrt(33))^(1/3)) - 1/6 (1 + i sqrt(3)) (17 + 3 sqrt(33))^(1/3), 1)
+v_3 = (-1/3 + (2 2^(2/3) (1 - i sqrt(3)))/(3 (13 + 3 sqrt(33))^(1/3)) - ((1 + i sqrt(3)) (13 + 3 sqrt(33))^(1/3))/(3 2^(2/3)), -1/3 + (1 + i sqrt(3))/(3 (17 + 3 sqrt(33))^(1/3)) - 1/6 (1 - i sqrt(3)) (17 + 3 sqrt(33))^(1/3), 1)
+-}
+
+-- M = S.J.S^(-1)
+type C = Complex Double
+type Mat = M.Matrix C
+s :: Mat
+s = M.fromList 3 3 [0.295598, (-0.647799) :+ (-1.72143), (-0.647799) :+ (1.72143),
+                    0.543689, (-0.771845) :+ (1.11514),  (-0.771845) :+ (-1.11514),
+                    1, 1, 1]
+j :: [C]
+j = [1.83929,
+              (-0.419643) :+ (-0.606291),
+                                          (-0.419643) :+ (0.606291)]
+s' :: Mat
+s' = M.fromList 3 3 [(0.336228) :+ (-2.81377e-18), (0.519032) :+ (-4.34358e-18), (0.61842) - (5.17532e-18),
+                     (-0.168114) :+ (0.198324), (-0.259516) :+ (-0.142222), (0.19079) :+ (0.0187006),
+                     (-0.168114) :+ (-0.198324), (-0.259516) :+ (0.142222), (0.19079) :+ (-0.0187006)]
+
+pow n =
+  s `M.multStd2` j'' `M.multStd2` s'
+  where
+    j' :: [C]
+    j' = map (**n) j
+    j'' :: Mat
+    j'' = M.diagonalList 3 0 j'
+
+cnt'' 0 = 1
+cnt'' 1 = 1
+cnt'' 2 = 2
+cnt'' n =
+  let m = pow (n-2)
+      v = M.fromList 3 1 [1, 1, 2]
+      v' = m `M.multStd2` v
+  in  v' M.! (3, 1)
+
+approx :: Double -> C -> C -> Bool
+approx err a b = (realPart $ abs (a - b)) < err

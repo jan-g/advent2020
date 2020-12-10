@@ -320,3 +320,25 @@ main =
       
       it "part b for harder" $ do
         (Day10.partB example2) `shouldBe` 19208
+
+      it "works out the count of sequences of 1s" $ do
+        (Day10.cnt []) `shouldBe` 1
+        (Day10.cnt [1]) `shouldBe` 1
+        (Day10.cnt [1,1]) `shouldBe` 2
+        (Day10.cnt [1,1,1]) `shouldBe` 4
+        (Day10.cnt [1,1,1,1]) `shouldBe` 7   -- 1,1,1,1  1,1,2  1,2,1  1,3  2,1,1  2,2  3,1
+      
+      it "works out the count a different way" $ do
+        (Day10.cnt' 0) `shouldBe` 1
+        (Day10.cnt' 1) `shouldBe` 1
+        (Day10.cnt' 2) `shouldBe` 2
+        (Day10.cnt' 3) `shouldBe` 4
+        (Day10.cnt' 4) `shouldBe` 7   -- 1,1,1,1  1,1,2  1,2,1  1,3  2,1,1  2,2  3,1
+
+      let roughly = Day10.approx 1e-4
+      it "works out the count a really different way" $ do
+        Day10.cnt'' 0 `shouldSatisfy` roughly 1
+        Day10.cnt'' 1 `shouldSatisfy` roughly 1
+        Day10.cnt'' 2 `shouldSatisfy` roughly 2
+        Day10.cnt'' 3 `shouldSatisfy` roughly 4
+        Day10.cnt'' 4 `shouldSatisfy` roughly 7
