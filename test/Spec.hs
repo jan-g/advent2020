@@ -311,13 +311,13 @@ main =
       let example2 = [28,33,18,42,31,14,46,20,48,47,24,23,49,45,19,38,39,11,1,32,25,35,8,17,7,9,4,2,34,10,3]
       it "simple example" $ do
         (Day10.partA example1) `shouldBe` 7 * 5
-      
+
       it "harder example" $ do
         (Day10.partA example2) `shouldBe` 22 * 10
-      
+
       it "part a for easy" $ do
         (Day10.partB example1) `shouldBe` 8
-      
+
       it "part b for harder" $ do
         (Day10.partB example2) `shouldBe` 19208
 
@@ -327,7 +327,7 @@ main =
         (Day10.cnt [1,1]) `shouldBe` 2
         (Day10.cnt [1,1,1]) `shouldBe` 4
         (Day10.cnt [1,1,1,1]) `shouldBe` 7   -- 1,1,1,1  1,1,2  1,2,1  1,3  2,1,1  2,2  3,1
-      
+
       it "works out the count a different way" $ do
         (Day10.cnt' 0) `shouldBe` 1
         (Day10.cnt' 1) `shouldBe` 1
@@ -342,3 +342,57 @@ main =
         Day10.cnt'' 2 `shouldSatisfy` roughly 2
         Day10.cnt'' 3 `shouldSatisfy` roughly 4
         Day10.cnt'' 4 `shouldSatisfy` roughly 7
+
+    describe "day 11" $ do
+      let example = "L.LL.LL.LL\n\
+                    \LLLLLLL.LL\n\
+                    \L.L.L..L..\n\
+                    \LLLL.LL.LL\n\
+                    \L.LL.LL.LL\n\
+                    \L.LLLLL.LL\n\
+                    \..L.L.....\n\
+                    \LLLLLLLLLL\n\
+                    \L.LLLLLL.L\n\
+                    \L.LLLLL.LL" & lines
+      let step1 = "#.##.##.##\n\
+                  \#######.##\n\
+                  \#.#.#..#..\n\
+                  \####.##.##\n\
+                  \#.##.##.##\n\
+                  \#.#####.##\n\
+                  \..#.#.....\n\
+                  \##########\n\
+                  \#.######.#\n\
+                  \#.#####.##" & lines
+      let step2 = "#.LL.L#.##\n\
+                  \#LLLLLL.L#\n\
+                  \L.L.L..L..\n\
+                  \#LLL.LL.L#\n\
+                  \#.LL.LL.LL\n\
+                  \#.LLLL#.##\n\
+                  \..L.L.....\n\
+                  \#LLLLLLLL#\n\
+                  \#.LLLLLL.L\n\
+                  \#.#LLLL.##" & lines
+      let m = Day11.parse example
+      it "evolves the map" $ do
+        let m1 = Day11.parse step1
+        let m2 = Day11.parse step2
+        
+        Day11.step m `shouldBe` m1
+        Day11.step m1 `shouldBe` m2
+
+      let final = "#.#L.L#.##\n\
+                  \#LLL#LL.L#\n\
+                  \L.#.L..#..\n\
+                  \#L##.##.L#\n\
+                  \#.#L.LL.LL\n\
+                  \#.#L#L#.##\n\
+                  \..L.L.....\n\
+                  \#L#L##L#L#\n\
+                  \#.LLLLLL.L\n\
+                  \#.#L#L#.##" & lines
+      let m' = Day11.parse final
+      it "runs the map to conclusion" $ do
+        Day11.run m `shouldBe` m'
+        Day11.occupado m' `shouldBe` 37       
