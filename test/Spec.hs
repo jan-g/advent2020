@@ -395,4 +395,18 @@ main =
       let m' = Day11.parse final
       it "runs the map to conclusion" $ do
         Day11.run m `shouldBe` m'
-        Day11.occupado m' `shouldBe` 37       
+        Day11.occupado m' `shouldBe` 37
+      
+      let final' = "#.L#.L#.L#\n\
+                   \#LLLLLL.LL\n\
+                   \L.L.L..#..\n\
+                   \##L#.#L.L#\n\
+                   \L.L#.LL.L#\n\
+                   \#.LLLL#.LL\n\
+                   \..#.L.....\n\
+                   \LLL###LLL#\n\
+                   \#.LLLLL#.L\n\
+                   \#.L#LL#.L#" & lines
+      let m'' = Day11.parse final'
+      it "uses the updated rules" $ do
+        Day11.run' m `shouldBe` m''
