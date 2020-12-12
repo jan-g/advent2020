@@ -378,7 +378,7 @@ main =
       it "evolves the map" $ do
         let m1 = Day11.parse step1
         let m2 = Day11.parse step2
-        
+
         Day11.step m `shouldBe` m1
         Day11.step m1 `shouldBe` m2
 
@@ -396,7 +396,7 @@ main =
       it "runs the map to conclusion" $ do
         Day11.run m `shouldBe` m'
         Day11.occupado m' `shouldBe` 37
-      
+
       let final' = "#.L#.L#.L#\n\
                    \#LLLLLL.LL\n\
                    \L.L.L..#..\n\
@@ -410,3 +410,14 @@ main =
       let m'' = Day11.parse final'
       it "uses the updated rules" $ do
         Day11.run' m `shouldBe` m''
+
+    describe "Day 12" $ do
+      let example = "F10\n\
+                    \N3\n\
+                    \F7\n\
+                    \R90\n\
+                    \F11" & lines
+      let ms = Day12.parse example
+      it "passes part a" $ do
+        (Day12.go ms 0 0 1 0) `shouldBe` (17, -8, 0, -1)
+        Day12.day12 example `shouldBe` 25
