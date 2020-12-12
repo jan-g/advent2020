@@ -421,3 +421,6 @@ main =
       it "passes part a" $ do
         (Day12.go ms 0 0 1 0) `shouldBe` (17, -8, 0, -1)
         Day12.day12 example `shouldBe` 25
+      it "passes part b" $ do
+        (Day12.go' ms 0 0 10 1) `shouldBe` (214, -72, 4, -10)
+        Day12.day12b example `shouldBe` 286
