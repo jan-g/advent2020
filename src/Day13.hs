@@ -68,11 +68,15 @@ parse :: [String] -> (Integer, [Maybe Integer])
 parse ls =
   let earliest = read (ls !! 0)
       departures = ls !! 1
-                 & splitOn ","
-                 & map (\s -> case s of
-                                "x" -> Nothing
-                                otherwise -> Just (read s))
+                 & parse'
   in (earliest, departures)
+
+parse' :: String -> [Maybe Integer]
+parse' s = s
+         & splitOn ","
+         & map (\s -> case s of
+                        "x" -> Nothing
+                        otherwise -> Just (read s))
 
 partA earliest departures =
   let afters = [(d, d - earliest `mod` d) | d <- departures]
@@ -87,6 +91,136 @@ day13 ls =
   in depart * wait
 
 {-
+--- Part Two ---
+
+The shuttle company is running a contest: one gold coin for anyone that can find the earliest timestamp such that the first bus ID departs at that time and each subsequent listed bus ID departs at that subsequent minute. (The first line in your input is no longer relevant.)
+
+For example, suppose you have the same list of bus IDs as above:
+
+7,13,x,x,59,x,31,19
+
+An x in the schedule means there are no constraints on what bus IDs must depart at that time.
+
+This means you are looking for the earliest timestamp (called t) such that:
+
+    Bus ID 7 departs at timestamp t.
+    Bus ID 13 departs one minute after timestamp t.
+    There are no requirements or restrictions on departures at two or three minutes after timestamp t.
+    Bus ID 59 departs four minutes after timestamp t.
+    There are no requirements or restrictions on departures at five minutes after timestamp t.
+    Bus ID 31 departs six minutes after timestamp t.
+    Bus ID 19 departs seven minutes after timestamp t.
+
+The only bus departures that matter are the listed bus IDs at their specific offsets from t. Those bus IDs can depart at other times, and other bus IDs can depart at those times. For example, in the list above, because bus ID 19 must depart seven minutes after the timestamp at which bus ID 7 departs, bus ID 7 will always also be departing with bus ID 19 at seven minutes after timestamp t.
+
+In this example, the earliest timestamp at which this occurs is 1068781:
+
+time     bus 7   bus 13  bus 59  bus 31  bus 19
+1068773    .       .       .       .       .
+1068774    D       .       .       .       .
+1068775    .       .       .       .       .
+1068776    .       .       .       .       .
+1068777    .       .       .       .       .
+1068778    .       .       .       .       .
+1068779    .       .       .       .       .
+1068780    .       .       .       .       .
+1068781    D       .       .       .       .
+1068782    .       D       .       .       .
+1068783    .       .       .       .       .
+1068784    .       .       .       .       .
+1068785    .       .       D       .       .
+1068786    .       .       .       .       .
+1068787    .       .       .       D       .
+1068788    D       .       .       .       D
+1068789    .       .       .       .       .
+1068790    .       .       .       .       .
+1068791    .       .       .       .       .
+1068792    .       .       .       .       .
+1068793    .       .       .       .       .
+1068794    .       .       .       .       .
+1068795    D       D       .       .       .
+1068796    .       .       .       .       .
+1068797    .       .       .       .       .
+
+In the above example, bus ID 7 departs at timestamp 1068788 (seven minutes after t). This is fine; the only requirement on that minute is that bus ID 19 departs then, and it does.
+
+Here are some other examples:
+
+    The earliest timestamp that matches the list 17,x,13,19 is 3417.
+    67,7,59,61 first occurs at timestamp 754018.
+    67,x,7,59,61 first occurs at timestamp 779210.
+    67,7,x,59,61 first occurs at timestamp 1261476.
+    1789,37,47,1889 first occurs at timestamp 1202161486.
+
+However, with so many bus IDs in your list, surely the actual earliest timestamp will be larger than 100000000000000!
+
+What is the earliest timestamp such that all of the listed bus IDs depart at offsets matching their positions in the list?
 -}
 
-day13b ls = "hello world"
+{-
+  Constraints on diophantine equations:
+    7,13,x,x,59,x,31,19
+  Bus ID 7 (departs 0, 7, ...) departs at t + 1    -> t + 1 = 0 (7) -> t = 7m - 1
+  Bus ID 13 (departs 0, 13 ...) departs at t + 2   -> t + 2 = 0 (13) -> 7m - 1 = 13n - 2
+                                                                     -> 7m - 13n = -1
+                                                                     Solve this to give
+                                                                     -> m = ax + b
+                                                                     -> t = 7(ax) + 7b - 1
+                                                                     and repeat
+  We finally get t = Ax + B
+  Find the smallest value of t > 0
+-}
+
+partB ds =
+  let d' = [0..] `zip` ds
+         & filter (\(f, m) -> isJust m)
+         & map (\(f, Just m) -> (m, -f))
+  -- the first equation is t = mx + f
+      (m, f) = foldl1 combine d'
+      l = d' & map (\(m, f) -> m) & foldl1 lcm
+  -- we want the smallest t > 0
+  -- t - f = mx
+  -- t     = f (mod lcm)  
+  in (f `mod` l)
+
+{- If we have regular solutions for values of t:
+    t = mx + f
+    t = ny + g
+   Then
+    mx + f = ny + g, or
+    mx + (-n)y = g - f
+   then find a, b such that
+    x = ar + b     (along with y = cr + d)
+   satisfies both of these.
+   Substitute in so that
+    t = mx + f = mar + (mb + f)
+   The result, (m', f') = (ma, mb + f)
+-}
+
+combine (m, f) (n, g) =
+  let ((a, b), _) = solve m (-n) (g - f)
+      m' = m * a
+      f' = m * b + f
+  in  (m', f')
+
+-- Solve ax + by = c, giving ((s, t), (s', t')) where x = sr + t, y=s'r + t' is a solution
+solve :: Integer -> Integer -> Integer -> ((Integer, Integer), (Integer, Integer))
+solve a b c =
+  let (g, s, t) = euc a b                  -- find s and t such that as + bt = gcd(a,b)
+      (x1, y1)  = (s * c `div` g, t * c `div` g)   -- find an example x1, y1 such that a.x1 + b.y1 = c
+--      c = a * x1 + b * y1
+  in ((-b `div` g, x1), (a `div` g, y1))
+
+
+-- extended euclidean algorithm: given a, b, return (g, s, t) such that g = gcd(a, b) and as + bt = g
+euc a b = xeuc (1, a, 1, 0) (1, b, 0, 1)
+  where
+    xeuc (q0, r0, s0, t0) (q1, r1, s1, t1)
+      | r1 == 0 = (r0, s0, t0)
+      | otherwise = let (q, r) = divMod r0 r1
+                    in  xeuc (q1, r1, s1, t1) (q, r, s0 - q * s1, t0 - q * t1)
+    
+
+day13b ls =
+  let (_, d) = parse ls
+  in partB d

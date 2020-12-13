@@ -434,3 +434,37 @@ main =
             d' = catMaybes d
         (Day13.partA e d') `shouldBe` (59, 5)
         (Day13.day13 example) `shouldBe` 59 * 5
+
+      forM_ [("5", 0)
+            ,("5,5", 0)
+            ,("2,3", 2)
+            ,("2,3,4", 2)
+            ,("2,x,4", 2)
+            ,("2,3,4,5", 2)
+            ,("7,13,x,x,59,x,31,19", 1068781)
+            ,("17,x,13,19", 3417)
+            ,("67,7,59,61", 754018)
+            ,("67,x,7,59,61", 779210)
+            ,("67,7,x,59,61", 1261476)
+            ,("1789,37,47,1889", 1202161486)
+            ] $ \(example, answer) -> do
+          it ("solves example " ++ (show example)) $ do
+            (Day13.partB $ Day13.parse' example) `shouldBe` answer
+
+      forM_ [(240, 46), (199, 326)] $ \(a, b) -> do
+        let (g, s, t) = Day13.euc a b
+        it ("finds gcd of " ++ (show a) ++ " and " ++ (show b)) $ do
+          g `shouldBe` gcd a b
+        it ("performs extended euclidean algorithm for " ++ (show a) ++ " and " ++ (show b)) $ do
+          s * a + t * b `shouldBe` gcd a b
+
+      forM_ [(1, 7, -1)
+            ,(3, 5, 9)
+            ,(19, 6, 1)
+            ] $ \(a, b, c) -> do
+        it ("finds m and f such that x = mr + f are solutions to " ++ (show a) ++ "x + " ++ (show b) ++ "y = " ++ (show c)) $ do
+          let ((m, f), (m', f')) = Day13.solve a b c
+          forM_ [-30 .. 30] $ \r -> do
+            let x = m * r + f
+                y = m' * r + f'
+            a * x + b * y `shouldBe` c
