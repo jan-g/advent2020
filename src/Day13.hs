@@ -183,7 +183,21 @@ partB ds =
   -- t     = f (mod lcm)  where lcm is the lcm of all the intervals
   in (f `mod` l)
 
+partB' :: [Maybe Integer] -> Integer
+partB' ds =
+  let d' = [0..] `zip` ds
+         & filter (\(f, m) -> isJust m)
+         & map (\(f, Just m) -> (m, m - f))
+      (m, c) = combine 1 0 d'
+  in c
+  where
+    combine m c [] = (m, c)
+    combine m c ((n, d):rest) =
+      let mult = lcm m n
+          offs = [m+c, 2*m+c .. n*m + c] & filter (\o -> (o - d) `mod` n == 0) & head
+      in combine mult offs rest
+
 
 day13b ls =
   let (_, d) = parse ls
-  in partB d
+  in partB' d
