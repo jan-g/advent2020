@@ -452,7 +452,7 @@ main =
             (Day13.partB $ Day13.parse' example) `shouldBe` answer
 
       forM_ [(240, 46), (199, 326)] $ \(a, b) -> do
-        let (g, s, t) = Day13.euc a b
+        let (g, s, t) = euc a b
         it ("finds gcd of " ++ (show a) ++ " and " ++ (show b)) $ do
           g `shouldBe` gcd a b
         it ("performs extended euclidean algorithm for " ++ (show a) ++ " and " ++ (show b)) $ do
@@ -463,7 +463,7 @@ main =
             ,(19, 6, 1)
             ] $ \(a, b, c) -> do
         it ("finds m and f such that x = mr + f are solutions to " ++ (show a) ++ "x + " ++ (show b) ++ "y = " ++ (show c)) $ do
-          let ((m, f), (m', f')) = Day13.solve a b c
+          let ((m, f), (m', f')) = solveDiophantine a b c
           forM_ [-30 .. 30] $ \r -> do
             let x = m * r + f
                 y = m' * r + f'

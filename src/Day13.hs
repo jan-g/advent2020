@@ -175,51 +175,14 @@ partB ds =
   let d' = [0..] `zip` ds
          & filter (\(f, m) -> isJust m)
          & map (\(f, Just m) -> (m, -f))
-  -- the first equation is t = mx + f
-      (m, f) = foldl1 combine d'
+  -- the equations are t = mx - f
+      (m, f) = foldl1 combineDiophantine d'
       l = d' & map (\(m, f) -> m) & foldl1 lcm
   -- we want the smallest t > 0
-  -- t - f = mx
-  -- t     = f (mod lcm)  
+  -- t - f = mx  - m will be +/- lcm
+  -- t     = f (mod lcm)  where lcm is the lcm of all the intervals
   in (f `mod` l)
 
-{- If we have regular solutions for values of t:
-    t = mx + f
-    t = ny + g
-   Then
-    mx + f = ny + g, or
-    mx + (-n)y = g - f
-   then find a, b such that
-    x = ar + b     (along with y = cr + d)
-   satisfies both of these.
-   Substitute in so that
-    t = mx + f = mar + (mb + f)
-   The result, (m', f') = (ma, mb + f)
--}
-
-combine (m, f) (n, g) =
-  let ((a, b), _) = solve m (-n) (g - f)
-      m' = m * a
-      f' = m * b + f
-  in  (m', f')
-
--- Solve ax + by = c, giving ((s, t), (s', t')) where x = sr + t, y=s'r + t' is a solution
-solve :: Integer -> Integer -> Integer -> ((Integer, Integer), (Integer, Integer))
-solve a b c =
-  let (g, s, t) = euc a b                  -- find s and t such that as + bt = gcd(a,b)
-      (x1, y1)  = (s * c `div` g, t * c `div` g)   -- find an example x1, y1 such that a.x1 + b.y1 = c
---      c = a * x1 + b * y1
-  in ((-b `div` g, x1), (a `div` g, y1))
-
-
--- extended euclidean algorithm: given a, b, return (g, s, t) such that g = gcd(a, b) and as + bt = g
-euc a b = xeuc (1, a, 1, 0) (1, b, 0, 1)
-  where
-    xeuc (q0, r0, s0, t0) (q1, r1, s1, t1)
-      | r1 == 0 = (r0, s0, t0)
-      | otherwise = let (q, r) = divMod r0 r1
-                    in  xeuc (q1, r1, s1, t1) (q, r, s0 - q * s1, t0 - q * t1)
-    
 
 day13b ls =
   let (_, d) = parse ls
