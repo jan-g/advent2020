@@ -7,6 +7,7 @@ import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set
 import Control.Monad
 import Data.List.Split (splitOn)
+import Data.Maybe (catMaybes)
 
 import Lib
 import qualified Day1
@@ -424,3 +425,12 @@ main =
       it "passes part b" $ do
         (Day12.go' ms 0 0 10 1) `shouldBe` (214, -72, 4, -10)
         Day12.day12b example `shouldBe` 286
+
+    describe "day 13" $ do
+      let example = "939\n\
+                    \7,13,x,x,59,x,31,19" & lines
+      it "solves the simple example" $ do
+        let (e, d) = Day13.parse example
+            d' = catMaybes d
+        (Day13.partA e d') `shouldBe` (59, 5)
+        (Day13.day13 example) `shouldBe` 59 * 5
