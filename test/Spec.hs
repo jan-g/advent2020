@@ -468,3 +468,19 @@ main =
             let x = m * r + f
                 y = m' * r + f'
             a * x + b * y `shouldBe` c
+
+    describe "Day 14" $ do
+      let example = "mask = XXXXXXXXXXXXXXXXXXXXXXXXXXXXX1XXXX0X\n\
+                    \mem[8] = 11\n\
+                    \mem[7] = 101\n\
+                    \mem[8] = 0" & lines
+      let prog = Day14.parse example
+      it "applies the simple instruction" $ do
+        let Day14.Memory a o m = Day14.run Day14.nullMemory (take 2 prog)
+        m `shouldBe` Map.singleton 8 73
+      it "runs the sample program" $ do
+        let Day14.Memory a o m = Day14.run Day14.nullMemory prog
+        m `shouldBe` Map.fromList [(8, 64), (7, 101)]
+      it "tots up the result" $ do
+        let x = Day14.run Day14.nullMemory prog
+        Day14.sumValues x `shouldBe` 165
