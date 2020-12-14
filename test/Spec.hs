@@ -7,6 +7,7 @@ import qualified Data.Map.Strict as Map
 import qualified Data.Set as Set
 import Control.Monad
 import Data.List.Split (splitOn)
+import Data.List as L
 import Data.Maybe (catMaybes)
 
 import Lib
@@ -476,11 +477,29 @@ main =
                     \mem[8] = 0" & lines
       let prog = Day14.parse example
       it "applies the simple instruction" $ do
-        let Day14.Memory a o m = Day14.run Day14.nullMemory (take 2 prog)
+        let Day14.Memory a o s m = Day14.run Day14.nullMemory (take 2 prog)
         m `shouldBe` Map.singleton 8 73
       it "runs the sample program" $ do
-        let Day14.Memory a o m = Day14.run Day14.nullMemory prog
+        let Day14.Memory a o s m = Day14.run Day14.nullMemory prog
         m `shouldBe` Map.fromList [(8, 64), (7, 101)]
       it "tots up the result" $ do
         let x = Day14.run Day14.nullMemory prog
         Day14.sumValues x `shouldBe` 165
+
+      it "floats bits" $ do
+        (Day14.float 0 "111XXX111" 0) `shouldBe` 0
+        (Day14.float 0 "111XXX111" 7) `shouldBe` 56
+        (Day14.float 0 "111X0X1X1" 6) `shouldBe` 10
+      
+      it "computes addresses correctly" $ do
+        (Day14.addresses "000000000000000000000000000000X1001X" 42 & L.sort) `shouldBe` [26, 27, 58, 59]
+        (Day14.addresses "00000000000000000000000000000000X0XX" 26 & L.sort) `shouldBe` [16, 17, 18, 19, 24, 25, 26, 27]
+        
+      it "runs the example" $ do
+        let example = "mask = 000000000000000000000000000000X1001X\n\
+                      \mem[42] = 100\n\
+                      \mask = 00000000000000000000000000000000X0XX\n\
+                      \mem[26] = 1" & lines
+            prog = Day14.parse example
+        (Day14.run' Day14.nullMemory (take 2 prog) & Day14.memoryMap) `shouldBe` Map.fromList [(26, 100), (27, 100), (58, 100), (59, 100)]
+        (Day14.run' Day14.nullMemory prog & Day14.sumValues) `shouldBe` 208

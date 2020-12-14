@@ -62,7 +62,7 @@ Execute the initialization program. What is the sum of all values left in memory
 To begin, get your puzzle input.
 -}
 
-data Instr = Mask Integer Integer | Store Integer Integer
+data Instr = Mask Integer Integer String | Store Integer Integer
   deriving (Show, Eq)
 
 parse ls = ls
@@ -79,12 +79,12 @@ parseMask = do
   eof
   let and = readInt 2 isMask (\case '0' -> 0; _ -> 1) m & head & fst
       or = readInt 2 isMask (\case '1' -> 1; _ -> 0) m & head & fst
-  return $ Mask and or
-  where
-    isMask '0' = True
-    isMask '1' = True
-    isMask 'X' = True
-    isMask _ = False
+  return $ Mask and or m
+
+isMask '0' = True
+isMask '1' = True
+isMask 'X' = True
+isMask _ = False
 
 parseStore :: ReadP Instr
 parseStore = do
@@ -96,27 +96,121 @@ parseStore = do
   return $ Store a v
 
 
-data Memory = Memory Integer Integer (Map.Map Integer Integer)
+data Memory = Memory Integer Integer String (Map.Map Integer Integer)
   deriving (Show, Eq)
 
+memoryMap (Memory _ _ _ m) = m
+
 nullMemory :: Memory
-nullMemory = Memory 0 0 Map.empty
+nullMemory = Memory 0 0 "" Map.empty
 
 apply :: Memory -> Instr -> Memory
-apply (Memory _ _ m) (Mask a o)  = Memory a o m
-apply (Memory a o m) (Store d v) = Memory a o (Map.insert d (v .&. a .|. o) m)
+apply (Memory _ _ _ m) (Mask a o s)  = Memory a o s m
+apply (Memory a o s m) (Store d v) = Memory a o s (Map.insert d (v .&. a .|. o) m)
 
 run :: Memory -> [Instr] -> Memory
-run = foldl apply 
+run = foldl apply
 
 sumValues :: Memory -> Integer
-sumValues (Memory a o m) = Map.toList m & map snd & sum
+sumValues (Memory a o s m) = Map.toList m & map snd & sum
 
 day14 ls =
   let is = parse ls
   in  run nullMemory is & sumValues
 
 {-
+--- Part Two ---
+
+For some reason, the sea port's computer system still can't communicate with your ferry's docking program. It must be using version 2 of the decoder chip!
+
+A version 2 decoder chip doesn't modify the values being written at all. Instead, it acts as a memory address decoder. Immediately before a value is written to memory, each bit in the bitmask modifies the corresponding bit of the destination memory address in the following way:
+
+    If the bitmask bit is 0, the corresponding memory address bit is unchanged.
+    If the bitmask bit is 1, the corresponding memory address bit is overwritten with 1.
+    If the bitmask bit is X, the corresponding memory address bit is floating.
+
+A floating bit is not connected to anything and instead fluctuates unpredictably. In practice, this means the floating bits will take on all possible values, potentially causing many memory addresses to be written all at once!
+
+For example, consider the following program:
+
+mask = 000000000000000000000000000000X1001X
+mem[42] = 100
+mask = 00000000000000000000000000000000X0XX
+mem[26] = 1
+
+When this program goes to write to memory address 42, it first applies the bitmask:
+
+address: 000000000000000000000000000000101010  (decimal 42)
+mask:    000000000000000000000000000000X1001X
+result:  000000000000000000000000000000X1101X
+
+After applying the mask, four bits are overwritten, three of which are different, and two of which are floating. Floating bits take on every possible combination of values; with two floating bits, four actual memory addresses are written:
+
+000000000000000000000000000000011010  (decimal 26)
+000000000000000000000000000000011011  (decimal 27)
+000000000000000000000000000000111010  (decimal 58)
+000000000000000000000000000000111011  (decimal 59)
+
+Next, the program is about to write to memory address 26 with a different bitmask:
+
+address: 000000000000000000000000000000011010  (decimal 26)
+mask:    00000000000000000000000000000000X0XX
+result:  00000000000000000000000000000001X0XX
+
+This results in an address with three floating bits, causing writes to eight memory addresses:
+
+000000000000000000000000000000010000  (decimal 16)
+000000000000000000000000000000010001  (decimal 17)
+000000000000000000000000000000010010  (decimal 18)
+000000000000000000000000000000010011  (decimal 19)
+000000000000000000000000000000011000  (decimal 24)
+000000000000000000000000000000011001  (decimal 25)
+000000000000000000000000000000011010  (decimal 26)
+000000000000000000000000000000011011  (decimal 27)
+
+The entire 36-bit address space still begins initialized to the value 0 at every address, and you still need the sum of all values left in memory at the end of the program. In this example, the sum is 208.
+
+Execute the initialization program using an emulator for a version 2 decoder chip. What is the sum of all values left in memory after it completes?
 -}
 
-day14b ls = "hello world"
+apply' :: Memory -> Instr -> Memory
+apply' (Memory _ _ _ m) (Mask a o s)  = Memory a o s m
+apply' (Memory a o s m) (Store d v) = Memory a o s (foldl (\m addr -> Map.insert addr v m) m (addresses s d))
+  where
+    setBits = readInt 2 isMask (\case '1' -> 1; _ -> 0) s & head & fst
+    maskBits = readInt 2 isMask (\case '0' -> 1; _ -> 0) s & head & fst
+    allAddrs =
+      -- Count number of Xes in the mask
+      let numXs = s & filter (=='X') & length
+          ns = [0..(2 ^ numXs) - 1]
+          floating = [float 0 s n | n <- ns]
+      in [v .&. maskBits .|. setBits .|. f | f <- floating]          
+
+-- We need to reparse s.
+-- 0 bits are now unchanged in d
+-- 1 bits are set
+-- X bits take on all values
+addresses mask addr =
+  [addr .&. maskBits .|. setBits .|. f | f <- floating]          
+  where
+    setBits = readInt 2 isMask (\case '1' -> 1; _ -> 0) mask & head & fst
+    maskBits = readInt 2 isMask (\case '0' -> 1; _ -> 0) mask & head & fst
+    numXs = mask & filter (=='X') & length
+    ns = [0..(2 ^ numXs) - 1]
+    floating = [float 0 mask n | n <- ns]
+
+
+float :: Integer -> String -> Integer -> Integer
+float acc "" _ = acc
+float acc ('X':xs) n =
+  let (bits, bit) = divMod n 2
+  in  float (acc * 2 + bit) xs bits
+float acc (_:xs) n = float (acc * 2) xs n
+
+run' :: Memory -> [Instr] -> Memory
+run' = foldl apply'
+
+day14b ls =
+  let prog = parse ls
+  in  run' nullMemory prog & sumValues
+
