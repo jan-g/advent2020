@@ -509,3 +509,18 @@ main =
         take 10 (Day15.numbers [0, 3, 6]) `shouldBe` [0,3,6,0,3,3,1,0,4,0]
       it "computes the 2020th term of the sample sequence" $ do
         (Day15.numbers [0, 3, 6] !! 2019) `shouldBe` 436
+        (Day15.nth 2020 [0, 3, 6]) `shouldBe` 436
+
+    {- these take too long
+      let n = 30000000
+      forM_ [([0,3,6], 175594)
+            ,([1,3,2], 2578)
+            ,([2,1,3], 3544142)
+            ,([1,2,3], 261214)
+            ,([2,3,1], 6895259)
+            ,([3,2,1], 18)
+            ,([3,1,2], 362)
+            ] $ \(list, value) -> do
+        it ("works out the " ++ (show n) ++"th element of " ++ (show list)) $ do
+          Day15.nth n list `shouldBe` value
+    -}      

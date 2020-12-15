@@ -80,12 +80,41 @@ numbers input =
       in   aboutToSay : continue (thisTurn + 1) nextToSay (Map.insert aboutToSay thisTurn lastSpoken)
     
 
+nth n input =
+  let prefix = take (length input - 1) input
+      lastSpoken = prefix `zip` [1..] & Map.fromList  -- number -> turn spoken
+  in locate (length input & fromIntegral) (last input) lastSpoken
+  where
+    locate :: Integer -> Integer -> Map.Map Integer Integer -> Integer
+    locate thisTurn aboutToSay lastSpoken
+      | thisTurn == n = aboutToSay
+      | otherwise =
+                    let  previously = Map.lookup aboutToSay lastSpoken
+                         nextToSay = case previously of
+                                       Nothing -> 0
+                                       Just lastTurn -> thisTurn - lastTurn
+                    in   locate (thisTurn + 1) nextToSay (Map.insert aboutToSay thisTurn lastSpoken)
+
 day15 ls =
   let input = parse ls
       ns = numbers input
   in ns !! 2019
 
 {-
+--- Part Two ---
+Impressed, the Elves issue you a challenge: determine the 30000000th number spoken. For example, given the same starting numbers as above:
+
+    Given 0,3,6, the 30000000th number spoken is 175594.
+    Given 1,3,2, the 30000000th number spoken is 2578.
+    Given 2,1,3, the 30000000th number spoken is 3544142.
+    Given 1,2,3, the 30000000th number spoken is 261214.
+    Given 2,3,1, the 30000000th number spoken is 6895259.
+    Given 3,2,1, the 30000000th number spoken is 18.
+    Given 3,1,2, the 30000000th number spoken is 362.
+
+Given your starting numbers, what will be the 30000000th number spoken?
 -}
 
-day15b ls = "hello world"
+day15b ls =
+  let input = parse ls
+  in nth 30000000 input
