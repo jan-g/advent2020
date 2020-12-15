@@ -503,3 +503,9 @@ main =
             prog = Day14.parse example
         (Day14.run' Day14.nullMemory (take 2 prog) & Day14.memoryMap) `shouldBe` Map.fromList [(26, 100), (27, 100), (58, 100), (59, 100)]
         (Day14.run' Day14.nullMemory prog & Day14.sumValues) `shouldBe` 208
+    
+    describe "Day 15" $ do
+      it "iterates correctly" $ do
+        take 10 (Day15.numbers [0, 3, 6]) `shouldBe` [0,3,6,0,3,3,1,0,4,0]
+      it "computes the 2020th term of the sample sequence" $ do
+        (Day15.numbers [0, 3, 6] !! 2019) `shouldBe` 436
