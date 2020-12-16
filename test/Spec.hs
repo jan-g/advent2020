@@ -549,7 +549,7 @@ main =
         valid `shouldBe` [[7, 3, 47]]
       it "locates invalid fields" $ do
         Day16.allInvalids cs them `shouldBe` [4, 55, 12]
-      
+
       let example2 = "class: 0-1 or 4-19\n\
                      \row: 0-5 or 8-19\n\
                      \seat: 0-13 or 16-19\n\
@@ -569,7 +569,7 @@ main =
         Set.size (Day16.candidatesForFieldValues fs [3, 15, 5]) `shouldBe` 1  -- row
         Set.size (Day16.candidatesForFieldValues fs [9, 1, 14]) `shouldBe` 2  -- class row
         Set.size (Day16.candidatesForFieldValues fs [18, 5, 9]) `shouldBe` 3  -- class row seat
-      
+
       it "works out the whole set of candidates" $ do
         let fs = Day16.dictToSet cs
         (Day16.candidatesForTickets fs them & map (Set.map Day16.fieldName)) `shouldBe` [ Set.fromList ["row"]

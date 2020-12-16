@@ -57,3 +57,13 @@ tests:
     dependencies:
     - advent2020
     - hspec >= 2.5.5
+  advent2020-test2:
+    main:                Spec.hs
+    source-dirs:         test2
+    ghc-options:
+      - -threaded
+      - -rtsopts
+      - -with-rtsopts=-N
+    dependencies:
+      - advent2020
+      - hspec >= 2.5.5
