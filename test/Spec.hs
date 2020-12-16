@@ -490,11 +490,11 @@ main =
         (Day14.float 0 "111XXX111" 0) `shouldBe` 0
         (Day14.float 0 "111XXX111" 7) `shouldBe` 56
         (Day14.float 0 "111X0X1X1" 6) `shouldBe` 10
-      
+
       it "computes addresses correctly" $ do
         (Day14.addresses "000000000000000000000000000000X1001X" 42 & L.sort) `shouldBe` [26, 27, 58, 59]
         (Day14.addresses "00000000000000000000000000000000X0XX" 26 & L.sort) `shouldBe` [16, 17, 18, 19, 24, 25, 26, 27]
-        
+
       it "runs the example" $ do
         let example = "mask = 000000000000000000000000000000X1001X\n\
                       \mem[42] = 100\n\
@@ -503,7 +503,7 @@ main =
             prog = Day14.parse example
         (Day14.run' Day14.nullMemory (take 2 prog) & Day14.memoryMap) `shouldBe` Map.fromList [(26, 100), (27, 100), (58, 100), (59, 100)]
         (Day14.run' Day14.nullMemory prog & Day14.sumValues) `shouldBe` 208
-    
+
     describe "Day 15" $ do
       it "iterates correctly" $ do
         take 10 (Day15.numbers [0, 3, 6]) `shouldBe` [0,3,6,0,3,3,1,0,4,0]
@@ -523,4 +523,61 @@ main =
             ] $ \(list, value) -> do
         it ("works out the " ++ (show n) ++"th element of " ++ (show list)) $ do
           Day15.nth n list `shouldBe` value
-    -}      
+    -}
+
+    describe "Day 16" $ do
+      let example = "class: 1-3 or 5-7\n\
+                    \row: 6-11 or 33-44\n\
+                    \seat: 13-40 or 45-50\n\
+                    \\n\
+                    \your ticket:\n\
+                    \7,1,14\n\
+                    \\n\
+                    \nearby tickets:\n\
+                    \7,3,47\n\
+                    \40,4,50\n\
+                    \55,2,20\n\
+                    \38,6,12" & lines
+          (cs, me, them) = Day16.parse example
+      it "validates a field entry" $ do
+        Map.size (Day16.anyMatches cs 7) `shouldBe` 2
+      it "validates the first ticket" $ do
+        Day16.anyMatchAllFields cs [7, 3, 47] `shouldBe` True
+      it "locates valid and invalid tickets" $ do
+        let (valid, invalid) = Day16.initialValidation cs them
+        length invalid `shouldBe` 3
+        valid `shouldBe` [[7, 3, 47]]
+      it "locates invalid fields" $ do
+        Day16.allInvalids cs them `shouldBe` [4, 55, 12]
+      
+      let example2 = "class: 0-1 or 4-19\n\
+                     \row: 0-5 or 8-19\n\
+                     \seat: 0-13 or 16-19\n\
+                     \\n\
+                     \your ticket:\n\
+                     \11,12,13\n\
+                     \\n\
+                     \nearby tickets:\n\
+                     \3,9,18\n\
+                     \15,1,5\n\
+                     \5,14,9" & lines
+          (cs, me, them) = Day16.parse example2
+      it "parses correctly" $ do
+        them `shouldBe` [[3, 9, 18], [15, 1, 5], [5, 14, 9]]
+      it "works out the things each field could be" $ do
+        let fs = Day16.dictToSet cs
+        Set.size (Day16.candidatesForFieldValues fs [3, 15, 5]) `shouldBe` 1  -- row
+        Set.size (Day16.candidatesForFieldValues fs [9, 1, 14]) `shouldBe` 2  -- class row
+        Set.size (Day16.candidatesForFieldValues fs [18, 5, 9]) `shouldBe` 3  -- class row seat
+      
+      it "works out the whole set of candidates" $ do
+        let fs = Day16.dictToSet cs
+        (Day16.candidatesForTickets fs them & map (Set.map Day16.fieldName)) `shouldBe` [ Set.fromList ["row"]
+                                                                                        , Set.fromList ["class", "row"]
+                                                                                        , Set.fromList ["class", "row", "seat"]]
+      it "winnows the set of candidates" $ do
+        let fs = Day16.dictToSet cs
+            cands = Day16.candidatesForTickets fs them
+        (Day16.winnowCandidateSets cands & map (Set.map Day16.fieldName)) `shouldBe` [ Set.fromList ["row"]
+                                                                                     , Set.fromList ["class"]
+                                                                                     , Set.fromList ["seat"]]
