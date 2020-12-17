@@ -81,3 +81,83 @@ main =
         (Day16.winnowCandidateSets cands & map (Set.map Day16.fieldName)) `shouldBe` [ Set.fromList ["row"]
                                                                                      , Set.fromList ["class"]
                                                                                      , Set.fromList ["seat"]]
+
+    describe "Day 17" $ do
+      let example = ".#.\n\
+                    \..#\n\
+                    \###" & lines
+          g0 = Day17.parse example
+      it "parses the grid correctly" $ do
+        g0 `shouldBe` Set.fromList [(1,0,0), (2,1,0), (0,2,0), (1,2,0), (2,2,0)]
+      it "calculates bounds correctly" $ do
+        Day17.bounds g0 `shouldBe` ((0,2), (0,2), (0,0))
+
+      let s1 = "#..\n\
+               \..#\n\
+               \.#.\n\
+               \\n\
+               \#.#\n\
+               \.##\n\
+               \.#.\n\
+               \\n\
+               \#..\n\
+               \..#\n\
+               \.#." & lines
+          g1 = Day17.multiload s1
+          expected = Set.fromList [(0,0,-1), (2,1,-1), (1,2,-1),
+                                   (0,0,0), (2,0,0), (1,1,0), (2,1,0), (1,2,0),
+                                   (0,0,1), (2,1,1), (1,2,1)]
+      it "multiloads" $ do
+        g1 `shouldBe` expected
+      it "computes the next step correctly" $ do
+        let next = Day17.step g0
+        Day17.normalise next `shouldBe` expected
+                                                            
+      it "computes three cycles correctly" $ do
+        let s3 = ".......\n\
+                 \.......\n\
+                 \..##...\n\
+                 \..###..\n\
+                 \.......\n\
+                 \.......\n\
+                 \.......\n\
+                 \\n\
+                 \..#....\n\
+                 \...#...\n\
+                 \#......\n\
+                 \.....##\n\
+                 \.#...#.\n\
+                 \..#.#..\n\
+                 \...#...\n\
+                 \\n\
+                 \...#...\n\
+                 \.......\n\
+                 \#......\n\
+                 \.......\n\
+                 \.....##\n\
+                 \.##.#..\n\
+                 \...#...\n\
+                 \\n\
+                 \..#....\n\
+                 \...#...\n\
+                 \#......\n\
+                 \.....##\n\
+                 \.#...#.\n\
+                 \..#.#..\n\
+                 \...#...\n\
+                 \\n\
+                 \.......\n\
+                 \.......\n\
+                 \..##...\n\
+                 \..###..\n\
+                 \.......\n\
+                 \.......\n\
+                 \......." & lines
+            g3 = Day17.multiload s3
+        ((iterate Day17.step g0) !! 3 & Day17.normalise) `shouldBe` g3
+      
+      it "solves part A for the example" $ do
+        Day17.day17 example `shouldBe` 112
+      
+      it "solves part b for the example" $ do
+        Day17.day17b example `shouldBe` 848
