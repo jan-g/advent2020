@@ -9,6 +9,7 @@ import Control.Monad
 import Data.List.Split (splitOn)
 import Data.List as L
 import Data.Maybe (catMaybes)
+import qualified Text.ParserCombinators.ReadP as P
 
 import Lib
 import qualified Day16
@@ -112,7 +113,7 @@ main =
       it "computes the next step correctly" $ do
         let next = Day17.step g0
         Day17.normalise next `shouldBe` expected
-                                                            
+
       it "computes three cycles correctly" $ do
         let s3 = ".......\n\
                  \.......\n\
@@ -155,9 +156,36 @@ main =
                  \......." & lines
             g3 = Day17.multiload s3
         ((iterate Day17.step g0) !! 3 & Day17.normalise) `shouldBe` g3
-      
+
       it "solves part A for the example" $ do
         Day17.day17 example `shouldBe` 112
-      
+
       it "solves part b for the example" $ do
         Day17.day17b example `shouldBe` 848
+
+    describe "Day 18" $ do
+      it "Parses expressions" $ do
+        Day18.eval "1" `shouldBe` Just 1
+        Day18.eval "1+1" `shouldBe` Just 2
+        Day18.eval " 1 " `shouldBe` Just 1
+        Day18.eval " 1 +  1  " `shouldBe` Just 2
+      it "parses operators" $ do
+        let Just o = quickParse Day18.op " +"
+        1 `o` 9 `shouldBe` 10
+      it "parses otehr expressions" $ do
+        Day18.eval "1 + 2 * 3 + 4 * 5 + 6" `shouldBe` Just 71
+      it "parses operators" $ do
+        let Just m = quickParse Day18.mult " * "
+        let Just p = quickParse Day18.plus " + "
+        2 `m` 3 `shouldBe` 6
+        2 `p` 3 `shouldBe` 5
+
+      forM_ [ ("1 + 2 * 3 + 4 * 5 + 6", 231)
+            , ("1 + (2 * 3) + (4 * (5 + 6))", 51)
+            , ("2 * 3 + (4 * 5)", 46)
+            , ("5 + (8 * 3 + 9 + 3 * 4 * 3)", 1445)
+            , ("5 * 9 * (7 * 3 * 3 + 9 * 3 + (8 + 6 * 4))", 669060)
+            , ("((2 + 4 * 9) * (6 + 9 * 8 + 6) + 6) + 2 + 4 * 2", 23340)
+            ] $ \(e, v) -> do
+        it ("parses " ++ e) $ do
+          Day18.eval' e `shouldBe` Just v
