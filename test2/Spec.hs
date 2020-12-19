@@ -189,3 +189,37 @@ main =
             ] $ \(e, v) -> do
         it ("parses " ++ e) $ do
           Day18.eval' e `shouldBe` Just v
+
+    describe "day 19" $ do
+      let exampleRules = "0: 4 1 5\n\
+                         \1: 2 3 | 3 2\n\
+                         \2: 4 4 | 5 5\n\
+                         \3: 4 5 | 5 4\n\
+                         \4: \"a\"\n\
+                         \5: \"b\"" & lines
+          examplePatterns = "ababbb\n\
+                            \bababa\n\
+                            \abbbab\n\
+                            \aaabbb\n\
+                            \aaaabbb" & lines
+          rule = Day19.parseRules exampleRules
+      it "should compile the rule" $ do
+        let r4 = Day19.Match 'a'
+            r5 = Day19.Match 'b'
+            r2 = Day19.Alt [Day19.Seq [r4, r4], Day19.Seq [r5, r5]]
+            r3 = Day19.Alt [Day19.Seq [r4, r5], Day19.Seq [r5, r4]]
+            r1 = Day19.Alt [Day19.Seq [r2, r3], Day19.Seq [r3, r2]]
+            r0 = Day19.Seq [r4, r1, r5]
+        rule `shouldBe` r0
+
+      it "should match correctly" $ do
+        Day19.matches rule "ababbb" `shouldBe` True
+        Day19.matches rule "abbbab" `shouldBe` True
+
+      it "should fail to match correctly" $ do
+        Day19.matches rule "bababa" `shouldBe` False
+        Day19.matches rule "aaabbb" `shouldBe` False
+        Day19.matches rule "aaaabbb" `shouldBe` False
+
+      it "filters correctly" $ do
+        Day19.day19 (exampleRules ++ [""] ++ examplePatterns) `shouldBe` 2
