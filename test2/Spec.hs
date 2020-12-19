@@ -223,3 +223,7 @@ main =
 
       it "filters correctly" $ do
         Day19.day19 (exampleRules ++ [""] ++ examplePatterns) `shouldBe` 2
+
+      it "repeats single strings" $ do
+        Day19.repeatString 5 " " "42" `shouldBe` "42 42 42 42 42"
+        take 3 (Day19.repeatsOfString " " "42") `shouldBe` ["42", "42 42", "42 42 42"]
