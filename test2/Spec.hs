@@ -227,3 +227,170 @@ main =
       it "repeats single strings" $ do
         Day19.repeatString 5 " " "42" `shouldBe` "42 42 42 42 42"
         take 3 (Day19.repeatsOfString " " "42") `shouldBe` ["42", "42 42", "42 42 42"]
+
+    describe "Day 20" $ do
+      let t = "Tile 1:\n\
+              \abc\n\
+              \def\n\
+              \ghi" & lines
+          (1, tile) = Day20.parseTile t
+      forM_ [ ((Day20.Normal, Day20.T), Day20.T, "abc")
+            , ((Day20.Normal, Day20.T), Day20.B, "ghi")
+            , ((Day20.Normal, Day20.T), Day20.L, "adg")
+            , ((Day20.Normal, Day20.T), Day20.R, "cfi")
+
+            , ((Day20.Normal, Day20.L), Day20.T, "gda")
+            , ((Day20.Normal, Day20.L), Day20.B, "ifc")
+            , ((Day20.Normal, Day20.L), Day20.L, "ghi")
+            , ((Day20.Normal, Day20.L), Day20.R, "abc")
+
+            , ((Day20.Normal, Day20.B), Day20.T, "ihg")
+            , ((Day20.Normal, Day20.B), Day20.B, "cba")
+            , ((Day20.Normal, Day20.B), Day20.L, "ifc")
+            , ((Day20.Normal, Day20.B), Day20.R, "gda")
+
+            , ((Day20.Normal, Day20.R), Day20.T, "cfi")
+            , ((Day20.Normal, Day20.R), Day20.B, "adg")
+            , ((Day20.Normal, Day20.R), Day20.L, "cba")
+            , ((Day20.Normal, Day20.R), Day20.R, "ihg")
+
+            , ((Day20.Flipped, Day20.T), Day20.T, "cba")
+            , ((Day20.Flipped, Day20.T), Day20.B, "ihg")
+            , ((Day20.Flipped, Day20.T), Day20.L, "cfi")
+            , ((Day20.Flipped, Day20.T), Day20.R, "adg")
+
+            , ((Day20.Flipped, Day20.L), Day20.T, "adg")
+            , ((Day20.Flipped, Day20.L), Day20.B, "cfi")
+            , ((Day20.Flipped, Day20.L), Day20.L, "abc")
+            , ((Day20.Flipped, Day20.L), Day20.R, "ghi")
+
+            , ((Day20.Flipped, Day20.B), Day20.T, "ghi")
+            , ((Day20.Flipped, Day20.B), Day20.B, "abc")
+            , ((Day20.Flipped, Day20.B), Day20.L, "gda")
+            , ((Day20.Flipped, Day20.B), Day20.R, "ifc")
+
+            , ((Day20.Flipped, Day20.R), Day20.T, "ifc")
+            , ((Day20.Flipped, Day20.R), Day20.B, "gda")
+            , ((Day20.Flipped, Day20.R), Day20.L, "ihg")
+            , ((Day20.Flipped, Day20.R), Day20.R, "cba")
+
+            ] $ \(orient, side, value) -> do
+        it ("orientation:" ++ (show orient) ++ " side=" ++ (show side)) $ do
+          Day20.edge orient tile side `shouldBe` value
+      
+      let example = "Tile 2311:\n\
+                    \..##.#..#.\n\
+                    \##..#.....\n\
+                    \#...##..#.\n\
+                    \####.#...#\n\
+                    \##.##.###.\n\
+                    \##...#.###\n\
+                    \.#.#.#..##\n\
+                    \..#....#..\n\
+                    \###...#.#.\n\
+                    \..###..###\n\
+                    \\n\
+                    \Tile 1951:\n\
+                    \#.##...##.\n\
+                    \#.####...#\n\
+                    \.....#..##\n\
+                    \#...######\n\
+                    \.##.#....#\n\
+                    \.###.#####\n\
+                    \###.##.##.\n\
+                    \.###....#.\n\
+                    \..#.#..#.#\n\
+                    \#...##.#..\n\
+                    \\n\
+                    \Tile 1171:\n\
+                    \####...##.\n\
+                    \#..##.#..#\n\
+                    \##.#..#.#.\n\
+                    \.###.####.\n\
+                    \..###.####\n\
+                    \.##....##.\n\
+                    \.#...####.\n\
+                    \#.##.####.\n\
+                    \####..#...\n\
+                    \.....##...\n\
+                    \\n\
+                    \Tile 1427:\n\
+                    \###.##.#..\n\
+                    \.#..#.##..\n\
+                    \.#.##.#..#\n\
+                    \#.#.#.##.#\n\
+                    \....#...##\n\
+                    \...##..##.\n\
+                    \...#.#####\n\
+                    \.#.####.#.\n\
+                    \..#..###.#\n\
+                    \..##.#..#.\n\
+                    \\n\
+                    \Tile 1489:\n\
+                    \##.#.#....\n\
+                    \..##...#..\n\
+                    \.##..##...\n\
+                    \..#...#...\n\
+                    \#####...#.\n\
+                    \#..#.#.#.#\n\
+                    \...#.#.#..\n\
+                    \##.#...##.\n\
+                    \..##.##.##\n\
+                    \###.##.#..\n\
+                    \\n\
+                    \Tile 2473:\n\
+                    \#....####.\n\
+                    \#..#.##...\n\
+                    \#.##..#...\n\
+                    \######.#.#\n\
+                    \.#...#.#.#\n\
+                    \.#########\n\
+                    \.###.#..#.\n\
+                    \########.#\n\
+                    \##...##.#.\n\
+                    \..###.#.#.\n\
+                    \\n\
+                    \Tile 2971:\n\
+                    \..#.#....#\n\
+                    \#...###...\n\
+                    \#.#.###...\n\
+                    \##.##..#..\n\
+                    \.#####..##\n\
+                    \.#..####.#\n\
+                    \#..#.#..#.\n\
+                    \..####.###\n\
+                    \..#.#.###.\n\
+                    \...#.#.#.#\n\
+                    \\n\
+                    \Tile 2729:\n\
+                    \...#.#.#.#\n\
+                    \####.#....\n\
+                    \..#.#.....\n\
+                    \....#..#.#\n\
+                    \.##..##.#.\n\
+                    \.#.####...\n\
+                    \####.#.#..\n\
+                    \##.####...\n\
+                    \##..#.##..\n\
+                    \#.##...##.\n\
+                    \\n\
+                    \Tile 3079:\n\
+                    \#.#.#####.\n\
+                    \.#..######\n\
+                    \..#.......\n\
+                    \######....\n\
+                    \####.#..#.\n\
+                    \.#...#.##.\n\
+                    \#.#####.##\n\
+                    \..#.###...\n\
+                    \..#.......\n\
+                    \..#.###..." & lines
+      
+      it "searches more regularly for a solution" $ do
+        let allTiles = Day20.parse example
+        let Just ans = Day20.search (3, 3) allTiles Map.empty (0, 0)
+            (tl, _, _) = ans Map.! (0, 0)
+            (tr, _, _) = ans Map.! (2, 0)
+            (bl, _, _) = ans Map.! (0, 2)
+            (br, _, _) = ans Map.! (2, 2)
+        tl * tr * bl * br `shouldBe` 1951 * 3079 * 2971 * 1171      
