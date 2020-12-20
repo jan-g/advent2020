@@ -269,14 +269,14 @@ search (maxX, maxY) allTiles soFar (x, y) =
         -- this is not already chosen: we remove this tile from the remaining tiles
         guard $ fitsAbove tile o
         guard $ fitsRight tile o
-        
+
         -- work out the remaining tiles
         let remaining = Map.delete num allTiles
             newGrid = Map.insert (x, y) (num, o, tile) soFar
 
         -- fit the remaining tiles
         let solution = search (maxX, maxY) remaining newGrid nextCoord
-        guard $ isJust solution       
+        guard $ isJust solution
         return $ solution
   in if possibles == [] then Nothing else head possibles
   where
@@ -305,6 +305,156 @@ day20 ls =
   in  tl * tr * bl * br
 
 {-
+--- Part Two ---
+
+Now, you're ready to check the image for sea monsters.
+
+The borders of each tile are not part of the actual image; start by removing them.
+
+In the example above, the tiles become:
+
+.#.#..#. ##...#.# #..#####
+###....# .#....#. .#......
+##.##.## #.#.#..# #####...
+###.#### #...#.## ###.#..#
+##.#.... #.##.### #...#.##
+...##### ###.#... .#####.#
+....#..# ...##..# .#.###..
+.####... #..#.... .#......
+
+#..#.##. .#..###. #.##....
+#.####.. #.####.# .#.###..
+###.#.#. ..#.#### ##.#..##
+#.####.. ..##..## ######.#
+##..##.# ...#...# .#.#.#..
+...#..#. .#.#.##. .###.###
+.#.#.... #.##.#.. .###.##.
+###.#... #..#.##. ######..
+
+.#.#.### .##.##.# ..#.##..
+.####.## #.#...## #.#..#.#
+..#.#..# ..#.#.#. ####.###
+#..####. ..#.#.#. ###.###.
+#####..# ####...# ##....##
+#.##..#. .#...#.. ####...#
+.#.###.. ##..##.. ####.##.
+...###.. .##...#. ..#..###
+
+Remove the gaps to form the actual image:
+
+.#.#..#.##...#.##..#####
+###....#.#....#..#......
+##.##.###.#.#..######...
+###.#####...#.#####.#..#
+##.#....#.##.####...#.##
+...########.#....#####.#
+....#..#...##..#.#.###..
+.####...#..#.....#......
+#..#.##..#..###.#.##....
+#.####..#.####.#.#.###..
+###.#.#...#.######.#..##
+#.####....##..########.#
+##..##.#...#...#.#.#.#..
+...#..#..#.#.##..###.###
+.#.#....#.##.#...###.##.
+###.#...#..#.##.######..
+.#.#.###.##.##.#..#.##..
+.####.###.#...###.#..#.#
+..#.#..#..#.#.#.####.###
+#..####...#.#.#.###.###.
+#####..#####...###....##
+#.##..#..#...#..####...#
+.#.###..##..##..####.##.
+...###...##...#...#..###
+
+Now, you're ready to search for sea monsters! Because your image is monochrome, a sea monster will look like this:
+
+                  #
+#    ##    ##    ###
+ #  #  #  #  #  #
+
+When looking for this pattern in the image, the spaces can be anything; only the # need to match. Also, you might need to rotate or flip your image before it's oriented correctly to find sea monsters. In the above image, after flipping and rotating it to the appropriate orientation, there are two sea monsters (marked with O):
+
+.####...#####..#...###..
+#####..#..#.#.####..#.#.
+.#.#...#.###...#.##.O#..
+#.O.##.OO#.#.OO.##.OOO##
+..#O.#O#.O##O..O.#O##.##
+...#.#..##.##...#..#..##
+#.##.#..#.#..#..##.#.#..
+.###.##.....#...###.#...
+#.####.#.#....##.#..#.#.
+##...#..#....#..#...####
+..#.##...###..#.#####..#
+....#.##.#.#####....#...
+..##.##.###.....#.##..#.
+#...#...###..####....##.
+.#.##...#.##.#.#.###...#
+#.###.#..####...##..#...
+#.###...#.##...#.##O###.
+.O##.#OO.###OO##..OOO##.
+..O#.O..O..O.#O##O##.###
+#.#..##.########..#..##.
+#.#####..#.#...##..#....
+#....##..#.#########..##
+#...#.....#..##...###.##
+#..###....##.#...##.##.#
+
+Determine how rough the waters are in the sea monsters' habitat by counting the number of # that are not part of a sea monster. In the above example, the habitat's water roughness is 273.
+
+How many # are not part of a sea monster?
 -}
 
-day20b ls = "hello world"
+seaMonster :: Set.Set Coord
+seaMonster = "                  # \n\
+             \#    ##    ##    ###\n\
+             \ #  #  #  #  #  #   "
+           & lines
+           & loadMap
+           & Map.filter (=='#')
+           & Map.keysSet
+
+stripFrame tile =
+  let ((x0, x1), (y0, y1)) = boundMap tile
+  in Map.filterWithKey (\(x, y) _ -> x /= x0 && x /= x1 && y /= y0 && y /= y1) tile & normaliseMap
+
+orientTile (Normal, T) tile = tile
+orientTile (Normal, L) tile = rotateRightMap tile
+orientTile (Normal, R) tile = rotateLeftMap tile
+orientTile (Normal, B) tile = rotate180Map tile
+orientTile (Flipped, T) tile = flipXMap tile
+orientTile (Flipped, L) tile = flipXMap tile & rotateLeftMap
+orientTile (Flipped, R) tile = flipXMap tile & rotateRightMap
+orientTile (Flipped, B) tile = flipYMap tile
+
+assemblePicture :: Map.Map Coord (TileNum, Orientation, Tile) -> Tile
+assemblePicture tiles =
+  let (_, _, topLeftTile) = tiles Map.! (0, 0)
+      ((x0, x1), (y0, y1)) = boundMap topLeftTile
+      (xSize, ySize) = (x1 - x0 - 1, y1 - y0 - 1)   -- accounting for stripping off the frame
+      tiles' = Map.mapWithKey (\(x, y) (_, o, t) ->
+                                  t & stripFrame & orientTile o & offsetMap (x * xSize, y * ySize)) tiles
+             & Map.toList & map snd
+  in Map.unions tiles'
+
+findSeaMonsters picture =
+  let ((x0, x1), (y0, y1)) = boundMap picture
+  in  [(x, y) | x <- [x0..x1], y <- [y0..y1], monsterAt (x, y) picture] & Set.fromList
+
+monsterAt (x, y) picture = all (\(dx, dy) -> Map.lookup (x+dx, y+dy) picture == Just '#') seaMonster
+
+allOrientations tile =
+  let orientations = [id, rotateLeftMap, rotateRightMap, rotate180Map,
+                      flipXMap, flipXMap . rotateLeftMap, flipXMap . rotateRightMap, flipXMap . rotate180Map]
+  in  map (\f -> f tile) orientations
+
+day20b ls =
+  let tiles = parse ls
+      Just ans = Day20.search (12, 12) tiles Map.empty (0, 0)
+      picture = assemblePicture ans
+      locations = map findSeaMonsters (allOrientations picture) & Set.fromList
+                & Set.delete Set.empty   -- drop the orientations where nothing's there
+                & Set.toList & head      -- just take the set of coordinates
+      allPixels = picture & Map.filter (=='#') & Map.size
+      monsterPixels = Set.size seaMonster * Set.size locations 
+  in  allPixels - monsterPixels

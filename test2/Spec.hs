@@ -277,7 +277,7 @@ main =
             ] $ \(orient, side, value) -> do
         it ("orientation:" ++ (show orient) ++ " side=" ++ (show side)) $ do
           Day20.edge orient tile side `shouldBe` value
-      
+
       let example = "Tile 2311:\n\
                     \..##.#..#.\n\
                     \##..#.....\n\
@@ -385,7 +385,7 @@ main =
                     \..#.###...\n\
                     \..#.......\n\
                     \..#.###..." & lines
-      
+
       it "searches more regularly for a solution" $ do
         let allTiles = Day20.parse example
         let Just ans = Day20.search (3, 3) allTiles Map.empty (0, 0)
@@ -393,4 +393,58 @@ main =
             (tr, _, _) = ans Map.! (2, 0)
             (bl, _, _) = ans Map.! (0, 2)
             (br, _, _) = ans Map.! (2, 2)
-        tl * tr * bl * br `shouldBe` 1951 * 3079 * 2971 * 1171      
+        tl * tr * bl * br `shouldBe` 1951 * 3079 * 2971 * 1171
+
+      forM_ [ ((Day20.Normal, Day20.T), "abc\ndef\nghi")
+            , ((Day20.Normal, Day20.L), "gda\nheb\nifc")
+            , ((Day20.Normal, Day20.B), "ihg\nfed\ncba")
+            , ((Day20.Normal, Day20.R), "cfi\nbeh\nadg")
+            , ((Day20.Flipped, Day20.T), "cba\nfed\nihg")
+            , ((Day20.Flipped, Day20.L), "adg\nbeh\ncfi")
+            , ((Day20.Flipped, Day20.B), "ghi\ndef\nabc")
+            , ((Day20.Flipped, Day20.R), "ifc\nheb\ngda")
+            ] $ \(o, v) -> do
+
+        it ("correctly reorients tiles at " ++ (show o)) $ do
+          Day20.orientTile o tile `shouldBe` loadMap (lines v)
+
+      let expected = ".#.#..#.##...#.##..#####\n\
+                     \###....#.#....#..#......\n\
+                     \##.##.###.#.#..######...\n\
+                     \###.#####...#.#####.#..#\n\
+                     \##.#....#.##.####...#.##\n\
+                     \...########.#....#####.#\n\
+                     \....#..#...##..#.#.###..\n\
+                     \.####...#..#.....#......\n\
+                     \#..#.##..#..###.#.##....\n\
+                     \#.####..#.####.#.#.###..\n\
+                     \###.#.#...#.######.#..##\n\
+                     \#.####....##..########.#\n\
+                     \##..##.#...#...#.#.#.#..\n\
+                     \...#..#..#.#.##..###.###\n\
+                     \.#.#....#.##.#...###.##.\n\
+                     \###.#...#..#.##.######..\n\
+                     \.#.#.###.##.##.#..#.##..\n\
+                     \.####.###.#...###.#..#.#\n\
+                     \..#.#..#..#.#.#.####.###\n\
+                     \#..####...#.#.#.###.###.\n\
+                     \#####..#####...###....##\n\
+                     \#.##..#..#...#..####...#\n\
+                     \.#.###..##..##..####.##.\n\
+                     \...###...##...#...#..###" & lines
+          lookingFor = loadMap expected :: Map.Map (Int, Int) Char
+      it "correctly assembles the example picture" $ do
+        let allTiles = Day20.parse example
+        let Just ans = Day20.search (3, 3) allTiles Map.empty (0, 0)
+            assembled = Day20.assemblePicture ans
+            possibles = (iterate rotateLeftMap lookingFor & take 4) ++ (iterate rotateLeftMap (flipXMap lookingFor) & take 4)
+        assembled `elem` possibles `shouldBe` True
+
+      it "trivially locates a sea monster" $ do
+        let monsterPic = "                  # \n\
+                         \#    ##    ##    ###\n\
+                         \ #  #  #  #  #  #   " & lines & loadMap :: Map.Map (Int, Int) Char
+        Day20.monsterAt (0, 0) monsterPic `shouldBe` True
+
+      it "locates positions of sea monsters" $ do
+        (map Day20.findSeaMonsters (Day20.allOrientations lookingFor) & Set.fromList) `shouldBe` Set.fromList [Set.empty, Set.fromList [(2, 2), (1, 16)]]

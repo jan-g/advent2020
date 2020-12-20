@@ -13,6 +13,9 @@ module Lib
     , (<<!!)
     , loadMap
     , loadMapWith
+    , boundMap, offsetMap, normaliseMap
+    , rotateLeftMap, rotateRightMap, rotate180Map
+    , flipXMap, flipYMap
     , wordParser
     , euc
     , solveDiophantine
@@ -71,7 +74,7 @@ mapReverseAll m =
       vks = [[(vv, Set.singleton kk)] | (kk, vvs) <- kvs', vv <- vvs]  -- [[(v, Set.Set k)]]
       vks' = concat vks                 -- [(v, Set.Set k)]
   in Map.fromListWith Set.union vks'
-      
+
 
 infixl 8 <<<<
 (<<<<) :: ReadP p1 -> ReadP p2 -> ReadP p1
@@ -104,6 +107,37 @@ loadMap ls = [((x, y), c) | (y, line) <- [0..] `zip` ls, (x, c) <- [0..] `zip` l
 
 loadMapWith :: (Num a, Ord a, Enum a) => ((a, a) -> Char -> b) -> [String] -> Map.Map (a, a) b
 loadMapWith f ls = loadMap ls & Map.mapWithKey f
+
+boundMap :: (Num a, Ord a, Enum a) => Map.Map (a, a) c -> ((a, a), (a, a))
+boundMap m =
+  let xs = Map.keysSet m & Set.map fst
+      ys = Map.keysSet m & Set.map snd
+  in ((minimum xs, maximum xs), (minimum ys, maximum ys))
+
+offsetMap :: (Num a, Ord a, Enum a) => (a, a) -> Map.Map (a, a) c -> Map.Map (a, a) c
+offsetMap (dx, dy) = Map.mapKeys (\(x,y) -> (x+dx, y+dy))
+
+-- make the map top-left be (0, 0)
+normaliseMap :: (Num a, Ord a, Enum a) => Map.Map (a, a) c -> Map.Map (a, a) c
+normaliseMap m =
+  let ((x0, _), (y0, _)) = boundMap m
+  in  offsetMap (-x0, -y0) m
+
+rotateLeftMap :: (Num a, Ord a, Enum a) => Map.Map (a, a) c -> Map.Map (a, a) c
+rotateLeftMap m = m & Map.mapKeys (\(x, y) -> (y, -x)) & normaliseMap
+
+rotateRightMap :: (Num a, Ord a, Enum a) => Map.Map (a, a) c -> Map.Map (a, a) c
+rotateRightMap m = m & Map.mapKeys (\(x, y) -> (-y, x)) & normaliseMap
+
+rotate180Map :: (Num a, Ord a, Enum a) => Map.Map (a, a) c -> Map.Map (a, a) c
+rotate180Map m = m & Map.mapKeys (\(x, y) -> (-x, -y)) & normaliseMap
+
+flipXMap :: (Num a, Ord a, Enum a) => Map.Map (a, a) c -> Map.Map (a, a) c
+flipXMap m = m & Map.mapKeys (\(x, y) -> (-x, y)) & normaliseMap
+
+flipYMap :: (Num a, Ord a, Enum a) => Map.Map (a, a) c -> Map.Map (a, a) c
+flipYMap m = m & Map.mapKeys (\(x, y) -> (x, -y)) & normaliseMap
+
 
 wordParser :: ReadP String
 wordParser = many1 (satisfy (/= ' '))
