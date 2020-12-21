@@ -448,3 +448,11 @@ main =
 
       it "locates positions of sea monsters" $ do
         (map Day20.findSeaMonsters (Day20.allOrientations lookingFor) & Set.fromList) `shouldBe` Set.fromList [Set.empty, Set.fromList [(2, 2), (1, 16)]]
+
+    describe "Day 21" $ do
+      let example = "mxmxvkd kfcds sqjhc nhms (contains dairy, fish)\n\
+                    \trh fvjkl sbzzf mxmxvkd (contains dairy)\n\
+                    \sqjhc fvjkl (contains soy)\n\
+                    \sqjhc mxmxvkd sbzzf (contains fish)" & lines
+      it "solves the example for part 1" $ do
+        Day21.day21 example `shouldBe` 5
