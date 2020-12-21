@@ -7,6 +7,7 @@ module Lib
     , drawMapWith
     , mapReverse
     , mapReverseAll
+    , narrowCandidateMap
     , (<<<<)
     , (>>>>)
     , (<<>>)
@@ -74,6 +75,22 @@ mapReverseAll m =
       vks = [[(vv, Set.singleton kk)] | (kk, vvs) <- kvs', vv <- vvs]  -- [[(v, Set.Set k)]]
       vks' = concat vks                 -- [(v, Set.Set k)]
   in Map.fromListWith Set.union vks'
+
+-- Sudoku-style constraint narrowing: 
+-- given a map of items to candidates, with a unique a->b solution available, work out that unique mapping
+narrowCandidateMap :: (Eq a, Ord b) => Map.Map a (Set.Set b) -> Either (Map.Map a (Set.Set b)) (Map.Map a b)
+narrowCandidateMap m =
+  let singletons = Map.filter (\cs -> Set.size cs == 1) m
+  in  if Map.size singletons == 0 then error "no unique solution"
+      else if Map.size singletons == Map.size m then Right $ finalise m
+      else
+        let uniquelyAssigned = Map.toList singletons & map snd & Set.unions
+            narrowed = Map.map (narrow uniquelyAssigned) m
+        in if narrowed /= m then narrowCandidateMap narrowed else Left m
+  where narrow singletons cs
+          | Set.size cs == 1 = cs
+          | otherwise        = Set.difference cs singletons
+        finalise m = Map.map (head . Set.toList) m
 
 
 infixl 8 <<<<

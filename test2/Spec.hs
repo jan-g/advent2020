@@ -456,3 +456,16 @@ main =
                     \sqjhc mxmxvkd sbzzf (contains fish)" & lines
       it "solves the example for part 1" $ do
         Day21.day21 example `shouldBe` 5
+      
+      it "solves the example for part 2" $ do
+        let rules = Day21.parse example
+            allergens = map snd rules & Set.unions
+            ingredients = map fst rules & Set.unions
+            possibles = Map.fromList [(a, ingredients) | a <- Set.toList allergens]
+            possibles' = Day21.narrow possibles rules
+        Day21.narrowCandidateMap possibles' `shouldBe` Right (Map.fromList [ ("dairy", "mxmxvkd")
+                                                                           , ("fish", "sqjhc")
+                                                                           , ("soy", "fvjkl")
+                                                                           ])
+      it "produces the final answer for part 2" $ do
+        Day21.day21b example `shouldBe` "mxmxvkd,sqjhc,fvjkl"
