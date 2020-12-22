@@ -463,9 +463,29 @@ main =
             ingredients = map fst rules & Set.unions
             possibles = Map.fromList [(a, ingredients) | a <- Set.toList allergens]
             possibles' = Day21.narrow possibles rules
-        Day21.narrowCandidateMap possibles' `shouldBe` Right (Map.fromList [ ("dairy", "mxmxvkd")
+        narrowCandidateMap possibles' `shouldBe` Right (Map.fromList [ ("dairy", "mxmxvkd")
                                                                            , ("fish", "sqjhc")
                                                                            , ("soy", "fvjkl")
                                                                            ])
       it "produces the final answer for part 2" $ do
         Day21.day21b example `shouldBe` "mxmxvkd,sqjhc,fvjkl"
+
+    describe "Day 22" $ do
+      let example ="Player 1:\n\
+                   \9\n\
+                   \2\n\
+                   \6\n\
+                   \3\n\
+                   \1\n\
+                   \\n\
+                   \Player 2:\n\
+                   \5\n\
+                   \8\n\
+                   \4\n\
+                   \7\n\
+                   \10" & lines
+      it "solves the example" $ do
+        let [a, b] = Day22.parse example
+        Day22.result (a, b) `shouldBe` ([], [3, 2, 10, 6, 8, 5, 9, 4, 7, 1])
+      it "scores a winning hand" $ do
+        Day22.score [3, 2, 10, 6, 8, 5, 9, 4, 7, 1] `shouldBe` 306
