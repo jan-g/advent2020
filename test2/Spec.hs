@@ -10,6 +10,7 @@ import Data.List.Split (splitOn)
 import Data.List as L
 import Data.Maybe (catMaybes)
 import qualified Text.ParserCombinators.ReadP as P
+import qualified Data.Sequence as Seq
 
 import Lib
 import qualified Day16
@@ -456,7 +457,7 @@ main =
                     \sqjhc mxmxvkd sbzzf (contains fish)" & lines
       it "solves the example for part 1" $ do
         Day21.day21 example `shouldBe` 5
-      
+
       it "solves the example for part 2" $ do
         let rules = Day21.parse example
             allergens = map snd rules & Set.unions
@@ -489,3 +490,10 @@ main =
         Day22.result (a, b) `shouldBe` ([], [3, 2, 10, 6, 8, 5, 9, 4, 7, 1])
       it "scores a winning hand" $ do
         Day22.score [3, 2, 10, 6, 8, 5, 9, 4, 7, 1] `shouldBe` 306
+
+      it "runs the example game" $ do
+        let [a, b] = Day22.parse example
+            result = Day22.play' (Seq.fromList a, Seq.fromList b) Set.empty
+        result `shouldBe` Right (Seq.fromList [7, 5, 6, 2, 4, 1, 10, 8, 9, 3])
+      it "scores the winning hand" $ do
+        Day22.day22b example `shouldBe` 291
