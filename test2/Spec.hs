@@ -497,3 +497,20 @@ main =
         result `shouldBe` Right (Seq.fromList [7, 5, 6, 2, 4, 1, 10, 8, 9, 3])
       it "scores the winning hand" $ do
         Day22.day22b example `shouldBe` 291
+
+    describe "Day 23" $ do
+      it "computes next moves" $ do
+        Day23.next "389125467" `shouldBe` "289154673"
+        Day23.next "289154673" `shouldBe` "546789132"
+        Day23.next "546789132" `shouldBe` "891346725"
+        Day23.next "891346725" `shouldBe` "467913258"
+        Day23.next "467913258" `shouldBe` "136792584"
+    
+      it "iterates successfully" $ do
+        (iterate Day23.next "389125467" & drop 10 & head) `shouldBe` "837419265"
+      
+      it "summarises the cups" $ do
+        (iterate Day23.next "389125467" & drop 10 & head & Day23.summarise '1') `shouldBe` "92658374"
+
+      it "runs the example" $ do
+        Day23.day23 ["389125467"] `shouldBe` "67384529"    
