@@ -514,3 +514,27 @@ main =
 
       it "runs the example" $ do
         Day23.day23 ["389125467"] `shouldBe` "67384529"    
+
+    describe "day 24" $ do
+      let example = "sesenwnenenewseeswwswswwnenewsewsw\n\
+                    \neeenesenwnwwswnenewnwwsewnenwseswesw\n\
+                    \seswneswswsenwwnwse\n\
+                    \nwnwneseeswswnenewneswwnewseswneseene\n\
+                    \swweswneswnenwsewnwneneseenw\n\
+                    \eesenwseswswnenwswnwnwsewwnwsene\n\
+                    \sewnenenenesenwsewnenwwwse\n\
+                    \wenwwweseeeweswwwnwwe\n\
+                    \wsweesenenewnwwnwsenewsenwwsesesenwne\n\
+                    \neeswseenwwswnwswswnw\n\
+                    \nenwswwsewswnenenewsenwsenwnesesenew\n\
+                    \enewnwewneswsewnwswenweswnenwsenwsw\n\
+                    \sweneswneswneneenwnewenewwneswswnese\n\
+                    \swwesenesewenwneswnwwneseswwne\n\
+                    \enesenwswwswneneswsenwnewswseenwsese\n\
+                    \wnwnesenesenenwwnenwsewesewsesesew\n\
+                    \nenewswnwewswnenesenwnesewesw\n\
+                    \eneswnwswnwsenenwnwnwwseeswneewsenese\n\
+                    \neswnwewnwnwseenwseesewsenwsweewe\n\
+                    \wseweeenwnesenwwwswnew" & lines
+      it "runs part a for the example" $ do
+        Day24.day24 example `shouldBe` 10
