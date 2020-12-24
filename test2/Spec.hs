@@ -538,3 +538,12 @@ main =
                     \wseweeenwnesenwwwswnew" & lines
       it "runs part a for the example" $ do
         Day24.day24 example `shouldBe` 10
+      
+      let moves = Day24.parse example
+          g0 = Day24.grid moves
+      it "runs the example for a day or two" $ do
+        
+        (g0 & iterate Day24.next & map Set.size & take 11) `shouldBe` [10, 15, 12, 25, 14, 23, 28, 41, 37, 49, 37]
+
+      it "runs for 100 days" $ do
+        Set.size (Day24.after 100 g0) `shouldBe` 2208
