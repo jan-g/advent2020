@@ -22,6 +22,7 @@ import qualified Day21
 import qualified Day22
 import qualified Day23
 import qualified Day24
+import qualified Day25
 
 
 main :: IO ()
@@ -547,3 +548,14 @@ main =
 
       it "runs for 100 days" $ do
         Set.size (Day24.after 100 g0) `shouldBe` 2208
+
+    describe "day 25" $ do
+      let example = ["5764801", "17807724"]
+      it "works out the log" $ do
+        Day25.pLog 5764801 1 0 `shouldBe` 8
+        Day25.pLog 17807724 1 0 `shouldBe` 11
+      it "works out the enc key" $ do
+        17807724 ^ 8 `mod` Day25.modulus `shouldBe` 14897079
+        5764801 ^ 11 `mod` Day25.modulus `shouldBe` 14897079
+      it "solves part a" $ do
+        Day25.day25 example `shouldBe` (14897079,14897079)
